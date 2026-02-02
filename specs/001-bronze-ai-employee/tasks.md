@@ -54,17 +54,17 @@
 
 **Use Agent**: `architect` - Review project structure before implementation
 
-- [ ] T001 Initialize Python project with UV: `uv init --package ai-employee`
-- [ ] T002 Add core dependencies: `uv add watchdog pyyaml`
-- [ ] T003 [P] Add dev dependencies: `uv add --dev pytest pytest-cov ruff`
-- [ ] T004 [P] Add optional Gmail dependencies: `uv add google-auth google-api-python-client --optional gmail`
-- [ ] T005 Create package structure: `src/ai_employee/__init__.py`
-- [ ] T006 [P] Create watchers module: `src/ai_employee/watchers/__init__.py`
-- [ ] T007 [P] Create models module: `src/ai_employee/models/__init__.py`
-- [ ] T008 [P] Create services module: `src/ai_employee/services/__init__.py`
-- [ ] T009 [P] Create CLI module: `src/ai_employee/cli/__init__.py`
-- [ ] T010 [P] Create tests structure: `tests/__init__.py`, `tests/unit/__init__.py`, `tests/integration/__init__.py`
-- [ ] T011 Configure ruff linting in `pyproject.toml`
+- [x] T001 Initialize Python project with UV: `uv init --package ai-employee`
+- [x] T002 Add core dependencies: `uv add watchdog pyyaml`
+- [x] T003 [P] Add dev dependencies: `uv add --dev pytest pytest-cov ruff`
+- [x] T004 [P] Add optional Gmail dependencies: `uv add google-auth google-api-python-client --optional gmail`
+- [x] T005 Create package structure: `src/ai_employee/__init__.py`
+- [x] T006 [P] Create watchers module: `src/ai_employee/watchers/__init__.py`
+- [x] T007 [P] Create models module: `src/ai_employee/models/__init__.py`
+- [x] T008 [P] Create services module: `src/ai_employee/services/__init__.py`
+- [x] T009 [P] Create CLI module: `src/ai_employee/cli/__init__.py`
+- [x] T010 [P] Create tests structure: `tests/__init__.py`, `tests/unit/__init__.py`, `tests/integration/__init__.py`
+- [x] T011 Configure ruff linting in `pyproject.toml`
 
 **After Phase**: Run `code-reviewer` agent to validate project structure
 
@@ -83,13 +83,13 @@
 
 **Reference Skills**: `/coding-standards`, `/backend-patterns`
 
-- [ ] T012 Implement ActionItem dataclass model in `src/ai_employee/models/action_item.py`
-- [ ] T013 [P] Implement ActivityLogEntry dataclass model in `src/ai_employee/models/activity_log.py`
-- [ ] T014 [P] Implement WatcherEvent dataclass model in `src/ai_employee/models/watcher_event.py`
-- [ ] T015 Implement YAML frontmatter parser utility in `src/ai_employee/utils/frontmatter.py`
-- [ ] T016 [P] Implement JSON lines logger utility in `src/ai_employee/utils/jsonl_logger.py`
-- [ ] T017 Create base watcher abstract class in `src/ai_employee/watchers/base.py`
-- [ ] T018 [P] Create vault path configuration in `src/ai_employee/config.py`
+- [x] T012 Implement ActionItem dataclass model in `src/ai_employee/models/action_item.py`
+- [x] T013 [P] Implement ActivityLogEntry dataclass model in `src/ai_employee/models/activity_log.py`
+- [x] T014 [P] Implement WatcherEvent dataclass model in `src/ai_employee/models/watcher_event.py`
+- [x] T015 Implement YAML frontmatter parser utility in `src/ai_employee/utils/frontmatter.py`
+- [x] T016 [P] Implement JSON lines logger utility in `src/ai_employee/utils/jsonl_logger.py`
+- [x] T017 Create base watcher abstract class in `src/ai_employee/watchers/base.py`
+- [x] T018 [P] Create vault path configuration in `src/ai_employee/config.py`
 
 **After Phase**: Run `code-reviewer` agent - Foundation must be solid before user stories
 
@@ -109,13 +109,13 @@
 
 ### Implementation for User Story 1
 
-- [ ] T019 [US1] Create DashboardState dataclass in `src/ai_employee/models/dashboard.py`
-- [ ] T020 [US1] Implement Dashboard template generator in `src/ai_employee/services/dashboard.py`
-- [ ] T021 [US1] Add pending items count logic (reads `/Needs_Action/` folder) in `src/ai_employee/services/dashboard.py`
-- [ ] T022 [US1] Add recent activity parser (reads from `/Logs/claude_*.log`) in `src/ai_employee/services/dashboard.py`
-- [ ] T023 [US1] Add watcher status indicator logic in `src/ai_employee/services/dashboard.py`
-- [ ] T024 [US1] Add warnings section (error threshold detection) in `src/ai_employee/services/dashboard.py`
-- [ ] T025 [US1] Create `/update-dashboard` skill in `.claude/skills/update-dashboard/SKILL.md`
+- [x] T019 [US1] Create DashboardState dataclass in `src/ai_employee/models/dashboard.py`
+- [x] T020 [US1] Implement Dashboard template generator in `src/ai_employee/services/dashboard.py`
+- [x] T021 [US1] Add pending items count logic (reads `/Needs_Action/` folder) in `src/ai_employee/services/dashboard.py`
+- [x] T022 [US1] Add recent activity parser (reads from `/Logs/claude_*.log`) in `src/ai_employee/services/dashboard.py`
+- [x] T023 [US1] Add watcher status indicator logic in `src/ai_employee/services/dashboard.py`
+- [x] T024 [US1] Add warnings section (error threshold detection) in `src/ai_employee/services/dashboard.py`
+- [x] T025 [US1] Create `/update-dashboard` skill in `.claude/skills/update-dashboard/SKILL.md`
 
 **After Phase**: Run `code-reviewer` agent to validate dashboard implementation
 
@@ -137,15 +137,15 @@
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Implement FileSystemWatcher class in `src/ai_employee/watchers/filesystem.py`
-- [ ] T027 [US2] Add watchdog Observer integration in `src/ai_employee/watchers/filesystem.py`
-- [ ] T028 [US2] Implement file copy to /Needs_Action with metadata in `src/ai_employee/watchers/filesystem.py`
-- [ ] T029 [US2] Add YAML frontmatter generation for action items in `src/ai_employee/watchers/filesystem.py`
-- [ ] T030 [US2] Implement watcher event logging to `/Logs/watcher_*.log` in `src/ai_employee/watchers/filesystem.py`
-- [ ] T031 [US2] Add error handling and /Quarantine move logic in `src/ai_employee/watchers/filesystem.py`
-- [ ] T032 [US2] Implement CLI entry point for watcher in `src/ai_employee/cli/main.py`
-- [ ] T033 [US2] Add `[project.scripts]` entry point in `pyproject.toml` for `ai-employee` command
-- [ ] T034 [US2] Create `/check-watcher-health` skill in `.claude/skills/check-watcher/SKILL.md`
+- [x] T026 [US2] Implement FileSystemWatcher class in `src/ai_employee/watchers/filesystem.py`
+- [x] T027 [US2] Add watchdog Observer integration in `src/ai_employee/watchers/filesystem.py`
+- [x] T028 [US2] Implement file copy to /Needs_Action with metadata in `src/ai_employee/watchers/filesystem.py`
+- [x] T029 [US2] Add YAML frontmatter generation for action items in `src/ai_employee/watchers/filesystem.py`
+- [x] T030 [US2] Implement watcher event logging to `/Logs/watcher_*.log` in `src/ai_employee/watchers/filesystem.py`
+- [x] T031 [US2] Add error handling and /Quarantine move logic in `src/ai_employee/watchers/filesystem.py`
+- [x] T032 [US2] Implement CLI entry point for watcher in `src/ai_employee/cli/main.py`
+- [x] T033 [US2] Add `[project.scripts]` entry point in `pyproject.toml` for `ai-employee` command
+- [x] T034 [US2] Create `/check-watcher-health` skill in `.claude/skills/check-watcher/SKILL.md`
 
 **After Phase**: Run `code-reviewer` + `security-reviewer` agents
 
@@ -168,13 +168,13 @@
 
 ### Implementation for User Story 3
 
-- [ ] T035 [US3] Implement ItemProcessor service in `src/ai_employee/services/processor.py`
-- [ ] T036 [US3] Add handbook rule reader in `src/ai_employee/services/processor.py`
-- [ ] T037 [US3] Implement file move from /Needs_Action to /Done in `src/ai_employee/services/processor.py`
-- [ ] T038 [US3] Add activity logging to `/Logs/claude_*.log` in `src/ai_employee/services/processor.py`
-- [ ] T039 [US3] Implement Dashboard.md auto-update after processing in `src/ai_employee/services/processor.py`
-- [ ] T040 [US3] Create `/process-inbox` skill in `.claude/skills/process-inbox/SKILL.md`
-- [ ] T041 [US3] Create inbox-processor agent in `.claude/agents/inbox-processor.md`
+- [x] T035 [US3] Implement ItemProcessor service in `src/ai_employee/services/processor.py`
+- [x] T036 [US3] Add handbook rule reader in `src/ai_employee/services/processor.py`
+- [x] T037 [US3] Implement file move from /Needs_Action to /Done in `src/ai_employee/services/processor.py`
+- [x] T038 [US3] Add activity logging to `/Logs/claude_*.log` in `src/ai_employee/services/processor.py`
+- [x] T039 [US3] Implement Dashboard.md auto-update after processing in `src/ai_employee/services/processor.py`
+- [x] T040 [US3] Create `/process-inbox` skill in `.claude/skills/process-inbox/SKILL.md`
+- [x] T041 [US3] Create inbox-processor agent in `.claude/agents/inbox-processor.md`
 
 **After Phase**: Run `code-reviewer` agent
 
@@ -194,12 +194,12 @@
 
 ### Implementation for User Story 4
 
-- [ ] T042 [US4] Implement HandbookParser service in `src/ai_employee/services/handbook.py`
-- [ ] T043 [US4] Add rule extraction logic (parse ### Rule N: sections) in `src/ai_employee/services/handbook.py`
-- [ ] T044 [US4] Add priority keyword detection from handbook rules in `src/ai_employee/services/handbook.py`
-- [ ] T045 [US4] Add conflict resolution (first rule wins) in `src/ai_employee/services/handbook.py`
-- [ ] T046 [US4] Integrate HandbookParser into ItemProcessor in `src/ai_employee/services/processor.py`
-- [ ] T047 [US4] Create default Company_Handbook.md template in `templates/Company_Handbook.md`
+- [x] T042 [US4] Implement HandbookParser service in `src/ai_employee/services/handbook.py`
+- [x] T043 [US4] Add rule extraction logic (parse ### Rule N: sections) in `src/ai_employee/services/handbook.py`
+- [x] T044 [US4] Add priority keyword detection from handbook rules in `src/ai_employee/services/handbook.py`
+- [x] T045 [US4] Add conflict resolution (first rule wins) in `src/ai_employee/services/handbook.py`
+- [x] T046 [US4] Integrate HandbookParser into ItemProcessor in `src/ai_employee/services/processor.py`
+- [x] T047 [US4] Create default Company_Handbook.md template in `templates/Company_Handbook.md`
 
 **After Phase**: Run `code-reviewer` agent
 
@@ -223,13 +223,13 @@
 
 ### Implementation for User Story 5
 
-- [ ] T048 [US5] Implement GmailWatcher class in `src/ai_employee/watchers/gmail.py`
-- [ ] T049 [US5] Add OAuth2 credential loading from environment in `src/ai_employee/watchers/gmail.py`
-- [ ] T050 [US5] Implement Gmail API polling (unread + important filter) in `src/ai_employee/watchers/gmail.py`
-- [ ] T051 [US5] Add processed message ID tracking (prevent duplicates) in `src/ai_employee/watchers/gmail.py`
-- [ ] T052 [US5] Create EMAIL_*.md action files with frontmatter in `src/ai_employee/watchers/gmail.py`
-- [ ] T053 [US5] Add watcher event logging for Gmail in `src/ai_employee/watchers/gmail.py`
-- [ ] T054 [US5] Add Gmail watcher CLI subcommand in `src/ai_employee/cli/main.py`
+- [x] T048 [US5] Implement GmailWatcher class in `src/ai_employee/watchers/gmail.py`
+- [x] T049 [US5] Add OAuth2 credential loading from environment in `src/ai_employee/watchers/gmail.py`
+- [x] T050 [US5] Implement Gmail API polling (unread + important filter) in `src/ai_employee/watchers/gmail.py`
+- [x] T051 [US5] Add processed message ID tracking (prevent duplicates) in `src/ai_employee/watchers/gmail.py`
+- [x] T052 [US5] Create EMAIL_*.md action files with frontmatter in `src/ai_employee/watchers/gmail.py`
+- [x] T053 [US5] Add watcher event logging for Gmail in `src/ai_employee/watchers/gmail.py`
+- [x] T054 [US5] Add Gmail watcher CLI subcommand in `src/ai_employee/cli/main.py`
 
 **After Phase**: Run `security-reviewer` + `code-reviewer` agents (credentials handling is critical)
 
@@ -249,11 +249,11 @@
 
 ### Implementation for User Story 6
 
-- [ ] T055 [US6] Finalize /process-inbox skill with complete instructions in `.claude/skills/process-inbox/SKILL.md`
-- [ ] T056 [P] [US6] Finalize /update-dashboard skill with complete instructions in `.claude/skills/update-dashboard/SKILL.md`
-- [ ] T057 [P] [US6] Finalize /check-watcher-health skill with complete instructions in `.claude/skills/check-watcher/SKILL.md`
-- [ ] T058 [US6] Create watcher-monitor agent in `.claude/agents/watcher-monitor.md`
-- [ ] T059 [US6] Add skill usage documentation to README
+- [x] T055 [US6] Finalize /process-inbox skill with complete instructions in `.claude/skills/process-inbox/SKILL.md`
+- [x] T056 [P] [US6] Finalize /update-dashboard skill with complete instructions in `.claude/skills/update-dashboard/SKILL.md`
+- [x] T057 [P] [US6] Finalize /check-watcher-health skill with complete instructions in `.claude/skills/check-watcher/SKILL.md`
+- [x] T058 [US6] Create watcher-monitor agent in `.claude/agents/watcher-monitor.md`
+- [x] T059 [US6] Add skill usage documentation to README
 
 **After Phase**: Run `doc-updater` agent to finalize documentation
 
@@ -271,13 +271,13 @@
 - `doc-updater` - Update all documentation
 - `e2e-runner` - Run end-to-end validation (optional)
 
-- [ ] T060 [P] Create vault initialization script in `scripts/init_vault.sh`
-- [ ] T061 [P] Create sample .env.example file in repository root
-- [ ] T062 Validate quickstart.md flow end-to-end
-- [ ] T063 [P] Add type hints validation with mypy in CI
-- [ ] T064 Run `refactor-cleaner` agent for code cleanup
-- [ ] T065 Run `security-reviewer` agent for final security audit
-- [ ] T066 Run `doc-updater` agent to update CLAUDE.md with final structure
+- [x] T060 [P] Create vault initialization script in `scripts/init_vault.sh`
+- [x] T061 [P] Create sample .env.example file in repository root
+- [x] T062 Validate quickstart.md flow end-to-end
+- [x] T063 [P] Add type hints validation with mypy in CI
+- [x] T064 Run `refactor-cleaner` agent for code cleanup
+- [x] T065 Run `security-reviewer` agent for final security audit
+- [x] T066 Run `doc-updater` agent to update CLAUDE.md with final structure
 
 ---
 
