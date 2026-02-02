@@ -1,0 +1,74 @@
+# Watcher Event Schema
+# Used in /Logs/watcher_YYYY-MM-DD.log files (JSON lines format)
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: WatcherEvent
+description: Schema for watcher log entries
+type: object
+required:
+  - timestamp
+  - source_type
+  - event_type
+  - identifier
+properties:
+  timestamp:
+    type: string
+    format: date-time
+    description: ISO 8601 timestamp when event occurred
+  source_type:
+    type: string
+    enum: [filesystem, gmail]
+    description: Type of watcher that generated the event
+  event_type:
+    type: string
+    enum: [created, modified, deleted, error, started, stopped]
+    description: Type of event detected
+  identifier:
+    type: string
+    minLength: 1
+    description: File path (filesystem) or message ID (gmail)
+  metadata:
+    type: object
+    description: Additional event-specific data
+    properties:
+      size:
+        type: integer
+        minimum: 0
+        description: File size in bytes
+      file_type:
+        type: string
+        description: File extension
+      from_address:
+        type: string
+        format: email
+        description: Email sender
+      subject:
+        type: string
+        description: Email subject
+      error_message:
+        type: string
+        description: Error details if event_type is error
+
+examples:
+  - timestamp: "2026-02-03T10:30:00Z"
+    source_type: filesystem
+    event_type: created
+    identifier: "/path/to/vault/Drop/report.pdf"
+    metadata:
+      size: 102400
+      file_type: ".pdf"
+
+  - timestamp: "2026-02-03T10:31:00Z"
+    source_type: gmail
+    event_type: created
+    identifier: "18d5a2b3c4e5f6g7"
+    metadata:
+      from_address: "client@example.com"
+      subject: "Re: Invoice for January"
+
+  - timestamp: "2026-02-03T10:32:00Z"
+    source_type: filesystem
+    event_type: error
+    identifier: "/path/to/vault/Drop/locked.txt"
+    metadata:
+      error_message: "Permission denied"
