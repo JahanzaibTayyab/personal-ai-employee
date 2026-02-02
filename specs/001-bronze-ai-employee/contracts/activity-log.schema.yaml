@@ -1,0 +1,50 @@
+# Activity Log Entry Schema
+# Used in /Logs/claude_YYYY-MM-DD.log files (JSON lines format)
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: ActivityLogEntry
+description: Schema for activity log entries written by Claude Code
+type: object
+required:
+  - timestamp
+  - action_type
+  - item_id
+  - outcome
+properties:
+  timestamp:
+    type: string
+    format: date-time
+    description: ISO 8601 timestamp when action occurred
+  action_type:
+    type: string
+    enum: [process, move, update, error]
+    description: Type of action performed
+  item_id:
+    type: string
+    minLength: 1
+    description: Filename of the item processed
+  outcome:
+    type: string
+    enum: [success, failure, skipped]
+    description: Result of the action
+  duration_ms:
+    type: integer
+    minimum: 0
+    description: Processing time in milliseconds
+  details:
+    type: string
+    description: Additional context or error message
+
+examples:
+  - timestamp: "2026-02-03T10:30:00Z"
+    action_type: process
+    item_id: "FILE_report.pdf.md"
+    outcome: success
+    duration_ms: 1234
+    details: "Processed file and moved to Done"
+
+  - timestamp: "2026-02-03T10:31:00Z"
+    action_type: error
+    item_id: "FILE_corrupted.bin.md"
+    outcome: failure
+    details: "Unable to read file: permission denied"

@@ -1,0 +1,95 @@
+# Action Item YAML Frontmatter Schema
+# Used in markdown files in /Needs_Action/ folder
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: ActionItemFrontmatter
+description: YAML frontmatter schema for action item markdown files
+type: object
+required:
+  - type
+  - source
+  - original_name
+  - created
+  - status
+  - priority
+properties:
+  type:
+    type: string
+    enum: [file_drop, email]
+    description: Type of action item
+  source:
+    type: string
+    enum: [filesystem, gmail]
+    description: Source of the action item
+  original_name:
+    type: string
+    minLength: 1
+    description: Original filename or email subject
+  created:
+    type: string
+    format: date-time
+    description: ISO 8601 timestamp when item was created
+  status:
+    type: string
+    enum: [pending, processing, done, quarantined]
+    default: pending
+    description: Current processing status
+  priority:
+    type: string
+    enum: [low, normal, high, urgent]
+    default: normal
+    description: Processing priority level
+  file_size:
+    type: integer
+    minimum: 0
+    description: File size in bytes (filesystem items only)
+  file_type:
+    type: string
+    pattern: "^\\.[a-zA-Z0-9]+$"
+    description: File extension with dot (filesystem items only)
+  from_address:
+    type: string
+    format: email
+    description: Sender email address (gmail items only)
+  message_id:
+    type: string
+    description: Gmail message ID (gmail items only)
+  processed_at:
+    type: string
+    format: date-time
+    description: ISO 8601 timestamp when item was processed
+  error:
+    type: string
+    description: Error message if item was quarantined
+
+# Conditional requirements
+allOf:
+  - if:
+      properties:
+        type: { const: file_drop }
+    then:
+      required: [file_size, file_type]
+  - if:
+      properties:
+        type: { const: email }
+    then:
+      required: [from_address, message_id]
+
+examples:
+  - type: file_drop
+    source: filesystem
+    original_name: "report.pdf"
+    created: "2026-02-03T10:30:00Z"
+    status: pending
+    priority: normal
+    file_size: 102400
+    file_type: ".pdf"
+
+  - type: email
+    source: gmail
+    original_name: "Re: Invoice for January"
+    created: "2026-02-03T11:00:00Z"
+    status: pending
+    priority: high
+    from_address: "client@example.com"
+    message_id: "18d5a2b3c4e5f6g7"
