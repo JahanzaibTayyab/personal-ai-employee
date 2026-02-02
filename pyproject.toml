@@ -16,6 +16,7 @@ dependencies = [
 gmail = [
     "google-api-python-client>=2.188.0",
     "google-auth>=2.48.0",
+    "google-auth-oauthlib>=1.2.4",
 ]
 
 [project.scripts]
