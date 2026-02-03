@@ -9,8 +9,13 @@ from typing import Any
 class ActionItemType(str, Enum):
     """Type of action item."""
 
+    # Bronze tier types
     FILE_DROP = "file_drop"
     EMAIL = "email"
+    # Silver tier types
+    WHATSAPP = "whatsapp"
+    LINKEDIN = "linkedin"
+    SCHEDULED = "scheduled"
 
 
 class ActionItemStatus(str, Enum):
@@ -34,8 +39,13 @@ class Priority(str, Enum):
 class SourceType(str, Enum):
     """Source of the action item."""
 
+    # Bronze tier sources
     FILESYSTEM = "filesystem"
     GMAIL = "gmail"
+    # Silver tier sources
+    WHATSAPP = "whatsapp"
+    LINKEDIN = "linkedin"
+    SCHEDULER = "scheduler"
 
 
 @dataclass

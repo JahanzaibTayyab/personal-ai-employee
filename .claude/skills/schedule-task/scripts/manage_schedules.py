@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Manage scheduled tasks."""
+"""Manage scheduled tasks using SchedulerService."""
 
 import argparse
 import json
@@ -15,12 +15,205 @@ def get_vault_path() -> Path:
     return Path(vault).expanduser()
 
 
-def generate_id(name: str) -> str:
-    """Generate schedule ID from name."""
-    return "schedule_" + name.lower().replace(" ", "_")
+def use_service(vault: Path) -> bool:
+    """Check if SchedulerService is available."""
+    try:
+        from ai_employee.services.scheduler import SchedulerService
+        return True
+    except ImportError:
+        return False
 
 
-def parse_frontmatter(content: str) -> dict:
+def list_schedules_via_service(vault: Path) -> dict:
+    """List all scheduled tasks using SchedulerService."""
+    from ai_employee.config import VaultConfig
+    from ai_employee.services.scheduler import SchedulerService
+
+    config = VaultConfig(root=vault)
+    service = SchedulerService(config)
+
+    tasks = service.get_all_tasks()
+
+    return {
+        "success": True,
+        "count": len(tasks),
+        "tasks": [
+            {
+                "id": t.id,
+                "name": t.name,
+                "schedule": t.schedule,
+                "enabled": t.enabled,
+                "timezone": t.timezone,
+                "last_run": t.last_run.isoformat() if t.last_run else None,
+                "next_run": t.next_run.isoformat() if t.next_run else None,
+                "type": t.action.get("type", "custom"),
+            }
+            for t in tasks
+        ]
+    }
+
+
+def create_schedule_via_service(
+    name: str,
+    schedule: str,
+    action_type: str,
+    timezone: str,
+    missed: str,
+    vault: Path
+) -> dict:
+    """Create a new scheduled task using SchedulerService."""
+    from ai_employee.config import VaultConfig
+    from ai_employee.services.scheduler import SchedulerService
+    from ai_employee.models.scheduled_task import ScheduledTask, TaskType, MissedStrategy
+
+    config = VaultConfig(root=vault)
+    service = SchedulerService(config)
+
+    # Map action type to TaskType
+    type_map = {
+        "briefing": TaskType.BRIEFING,
+        "audit": TaskType.AUDIT,
+        "update_dashboard": TaskType.UPDATE_DASHBOARD,
+        "check_approvals": TaskType.CHECK_APPROVALS,
+        "custom": TaskType.CUSTOM,
+    }
+    task_type = type_map.get(action_type.lower(), TaskType.CUSTOM)
+
+    # Map missed strategy
+    strategy_map = {
+        "skip": MissedStrategy.SKIP,
+        "run": MissedStrategy.RUN_IMMEDIATELY,
+        "run_immediately": MissedStrategy.RUN_IMMEDIATELY,
+        "queue": MissedStrategy.QUEUE,
+    }
+    strategy = strategy_map.get(missed.lower(), MissedStrategy.RUN_IMMEDIATELY)
+
+    task = ScheduledTask.create(
+        name=name,
+        schedule=schedule,
+        task_type=task_type,
+        timezone=timezone,
+        missed_strategy=strategy,
+    )
+
+    success = service.add_task(task)
+
+    return {
+        "success": success,
+        "task_id": task.id,
+        "name": name,
+        "schedule": schedule,
+        "timezone": timezone,
+        "type": task_type.value,
+    }
+
+
+def toggle_schedule_via_service(task_id: str, enabled: bool, vault: Path) -> dict:
+    """Enable or disable a scheduled task using SchedulerService."""
+    from ai_employee.config import VaultConfig
+    from ai_employee.services.scheduler import SchedulerService
+
+    config = VaultConfig(root=vault)
+    service = SchedulerService(config)
+
+    if enabled:
+        success = service.enable_task(task_id)
+    else:
+        success = service.disable_task(task_id)
+
+    if success:
+        return {
+            "success": True,
+            "task_id": task_id,
+            "enabled": enabled,
+        }
+    return {"success": False, "error": f"Task not found: {task_id}"}
+
+
+def delete_schedule_via_service(task_id: str, vault: Path) -> dict:
+    """Delete a scheduled task using SchedulerService."""
+    from ai_employee.config import VaultConfig
+    from ai_employee.services.scheduler import SchedulerService
+
+    config = VaultConfig(root=vault)
+    service = SchedulerService(config)
+
+    success = service.remove_task(task_id)
+
+    if success:
+        return {
+            "success": True,
+            "task_id": task_id,
+            "action": "deleted",
+        }
+    return {"success": False, "error": f"Task not found: {task_id}"}
+
+
+def run_task_via_service(task_id: str, vault: Path) -> dict:
+    """Run a scheduled task immediately using SchedulerService."""
+    from ai_employee.config import VaultConfig
+    from ai_employee.services.scheduler import SchedulerService
+
+    config = VaultConfig(root=vault)
+    service = SchedulerService(config)
+
+    result = service.run_task(task_id)
+    return result
+
+
+def get_missed_tasks_via_service(vault: Path) -> dict:
+    """Get all missed tasks using SchedulerService."""
+    from ai_employee.config import VaultConfig
+    from ai_employee.services.scheduler import SchedulerService
+
+    config = VaultConfig(root=vault)
+    service = SchedulerService(config)
+
+    missed = service.get_missed_tasks()
+
+    return {
+        "success": True,
+        "count": len(missed),
+        "tasks": [
+            {
+                "id": t.id,
+                "name": t.name,
+                "schedule": t.schedule,
+                "next_run": t.next_run.isoformat() if t.next_run else None,
+                "missed_strategy": t.missed_strategy.value,
+            }
+            for t in missed
+        ]
+    }
+
+
+# Fallback implementations for standalone mode
+def list_schedules_standalone(vault: Path) -> dict:
+    """List all scheduled tasks (standalone mode)."""
+    schedules_dir = vault / "Schedules"
+
+    if not schedules_dir.exists():
+        return {"success": True, "count": 0, "tasks": []}
+
+    tasks = []
+    for file in schedules_dir.glob("*.md"):
+        content = file.read_text()
+        fm = parse_frontmatter_simple(content)
+
+        tasks.append({
+            "id": fm.get("id", file.stem),
+            "name": fm.get("name", file.stem),
+            "schedule": fm.get("schedule", ""),
+            "enabled": fm.get("enabled", True),
+            "last_run": fm.get("last_run"),
+            "next_run": fm.get("next_run"),
+        })
+
+    tasks.sort(key=lambda x: x.get("name", ""))
+    return {"success": True, "count": len(tasks), "tasks": tasks, "mode": "standalone"}
+
+
+def parse_frontmatter_simple(content: str) -> dict:
     """Parse YAML frontmatter from markdown file."""
     if not content.startswith("---"):
         return {}
@@ -46,54 +239,20 @@ def parse_frontmatter(content: str) -> dict:
     return result
 
 
-def list_schedules(vault: Path) -> dict:
-    """List all scheduled tasks."""
-    schedules_dir = vault / "Schedules"
-
-    if not schedules_dir.exists():
-        return {"success": True, "count": 0, "tasks": []}
-
-    tasks = []
-
-    for file in schedules_dir.glob("schedule_*.md"):
-        content = file.read_text()
-        fm = parse_frontmatter(content)
-
-        tasks.append({
-            "id": fm.get("id", file.stem),
-            "name": fm.get("name", file.stem),
-            "schedule": fm.get("schedule", ""),
-            "enabled": fm.get("enabled", True),
-            "last_run": fm.get("last_run"),
-            "next_run": fm.get("next_run"),
-            "file": str(file)
-        })
-
-    tasks.sort(key=lambda x: x.get("name", ""))
-
-    return {
-        "success": True,
-        "count": len(tasks),
-        "tasks": tasks
-    }
-
-
-def create_schedule(
+def create_schedule_standalone(
     name: str,
     schedule: str,
-    action: str,
+    action_type: str,
     timezone: str,
     missed: str,
     vault: Path
 ) -> dict:
-    """Create a new scheduled task."""
+    """Create a new scheduled task (standalone mode)."""
     schedules_dir = vault / "Schedules"
     schedules_dir.mkdir(parents=True, exist_ok=True)
 
-    task_id = generate_id(name)
+    task_id = "schedule_" + name.lower().replace(" ", "_")
     now = datetime.now()
-
-    # Determine if cron or one-time
     is_cron = " " in schedule
 
     content = f"""---
@@ -104,8 +263,8 @@ timezone: "{timezone}"
 enabled: true
 missed_strategy: "{missed}"
 created_at: "{now.isoformat()}"
-last_run: null
-next_run: null
+action:
+  type: "{action_type}"
 ---
 
 ## Scheduled Task: {name}
@@ -114,21 +273,6 @@ next_run: null
 **Timezone**: {timezone}
 **Type**: {"Recurring (cron)" if is_cron else "One-time"}
 **Missed Strategy**: {missed}
-
-### Action
-
-```yaml
-type: {action}
-```
-
-### Execution History
-
-| Date | Time | Duration | Result |
-|------|------|----------|--------|
-| - | - | - | - |
-
----
-*Created: {now.strftime("%Y-%m-%d %H:%M")}*
 """
 
     task_file = schedules_dir / f"{task_id}.md"
@@ -139,97 +283,93 @@ type: {action}
         "task_id": task_id,
         "name": name,
         "schedule": schedule,
-        "file": str(task_file)
-    }
-
-
-def toggle_schedule(task_id: str, enabled: bool, vault: Path) -> dict:
-    """Enable or disable a scheduled task."""
-    schedules_dir = vault / "Schedules"
-
-    matching = list(schedules_dir.glob(f"*{task_id}*.md"))
-    if not matching:
-        return {"success": False, "error": f"Task not found: {task_id}"}
-
-    task_file = matching[0]
-    content = task_file.read_text()
-
-    # Update enabled status
-    if "enabled: true" in content:
-        content = content.replace("enabled: true", f"enabled: {str(enabled).lower()}")
-    elif "enabled: false" in content:
-        content = content.replace("enabled: false", f"enabled: {str(enabled).lower()}")
-
-    task_file.write_text(content)
-
-    return {
-        "success": True,
-        "task_id": task_id,
-        "enabled": enabled,
-        "file": str(task_file)
-    }
-
-
-def delete_schedule(task_id: str, vault: Path) -> dict:
-    """Delete a scheduled task."""
-    schedules_dir = vault / "Schedules"
-
-    matching = list(schedules_dir.glob(f"*{task_id}*.md"))
-    if not matching:
-        return {"success": False, "error": f"Task not found: {task_id}"}
-
-    task_file = matching[0]
-    task_file.unlink()
-
-    return {
-        "success": True,
-        "task_id": task_id,
-        "action": "deleted"
+        "mode": "standalone",
     }
 
 
 def main():
     parser = argparse.ArgumentParser(description="Manage scheduled tasks")
-    parser.add_argument("action", choices=["list", "create", "enable", "disable", "delete"],
+    parser.add_argument("action", choices=["list", "create", "enable", "disable", "delete", "run", "missed"],
                        nargs="?", default="list", help="Action to perform")
     parser.add_argument("--id", help="Task ID")
     parser.add_argument("--name", help="Task name (for create)")
     parser.add_argument("--schedule", help="Cron expression or ISO datetime")
-    parser.add_argument("--action-type", default="custom", help="Action type")
+    parser.add_argument("--action-type", default="custom", help="Action type (briefing, audit, custom)")
     parser.add_argument("--timezone", default="local", help="Timezone")
     parser.add_argument("--missed", default="run", choices=["skip", "run", "queue"],
                        help="Missed schedule strategy")
     parser.add_argument("--vault", help="Vault path override")
     parser.add_argument("--json", action="store_true", help="Output JSON")
+    parser.add_argument("--standalone", action="store_true", help="Use standalone mode (skip service)")
 
     args = parser.parse_args()
     vault = Path(args.vault).expanduser() if args.vault else get_vault_path()
 
+    # Determine mode
+    service_available = not args.standalone and use_service(vault)
+
     if args.action == "list":
-        result = list_schedules(vault)
+        if service_available:
+            result = list_schedules_via_service(vault)
+        else:
+            result = list_schedules_standalone(vault)
+
     elif args.action == "create":
         if not args.name or not args.schedule:
             print("Error: --name and --schedule required for create", file=sys.stderr)
             sys.exit(1)
-        result = create_schedule(
-            args.name, args.schedule, args.action_type,
-            args.timezone, args.missed, vault
-        )
+        if service_available:
+            result = create_schedule_via_service(
+                args.name, args.schedule, args.action_type,
+                args.timezone, args.missed, vault
+            )
+        else:
+            result = create_schedule_standalone(
+                args.name, args.schedule, args.action_type,
+                args.timezone, args.missed, vault
+            )
+
     elif args.action == "enable":
         if not args.id:
             print("Error: --id required", file=sys.stderr)
             sys.exit(1)
-        result = toggle_schedule(args.id, True, vault)
+        if service_available:
+            result = toggle_schedule_via_service(args.id, True, vault)
+        else:
+            result = {"success": False, "error": "Service required for enable/disable"}
+
     elif args.action == "disable":
         if not args.id:
             print("Error: --id required", file=sys.stderr)
             sys.exit(1)
-        result = toggle_schedule(args.id, False, vault)
+        if service_available:
+            result = toggle_schedule_via_service(args.id, False, vault)
+        else:
+            result = {"success": False, "error": "Service required for enable/disable"}
+
     elif args.action == "delete":
         if not args.id:
             print("Error: --id required", file=sys.stderr)
             sys.exit(1)
-        result = delete_schedule(args.id, vault)
+        if service_available:
+            result = delete_schedule_via_service(args.id, vault)
+        else:
+            result = {"success": False, "error": "Service required for delete"}
+
+    elif args.action == "run":
+        if not args.id:
+            print("Error: --id required", file=sys.stderr)
+            sys.exit(1)
+        if service_available:
+            result = run_task_via_service(args.id, vault)
+        else:
+            result = {"success": False, "error": "Service required for run"}
+
+    elif args.action == "missed":
+        if service_available:
+            result = get_missed_tasks_via_service(vault)
+        else:
+            result = {"success": False, "error": "Service required for missed check"}
 
     if args.json:
         print(json.dumps(result, indent=2))
@@ -238,25 +378,49 @@ def main():
             if result["count"] == 0:
                 print("No scheduled tasks.")
             else:
-                print(f"## Scheduled Tasks ({result['count']})\n")
-                print("| ID | Name | Schedule | Status |")
-                print("|----|------|----------|--------|")
+                print(f"Scheduled Tasks ({result['count']})")
+                if result.get("mode") == "standalone":
+                    print("(standalone mode)")
+                print()
                 for t in result["tasks"]:
-                    status = "✅ Enabled" if t["enabled"] else "⏸️ Disabled"
-                    print(f"| {t['id']} | {t['name']} | {t['schedule']} | {status} |")
+                    status = "Enabled" if t.get("enabled") else "Disabled"
+                    print(f"  - {t['name']} ({t['id']})")
+                    print(f"    Schedule: {t['schedule']}")
+                    print(f"    Status: {status}")
+                    if t.get("type"):
+                        print(f"    Type: {t['type']}")
+                    print()
+
+        elif args.action == "missed":
+            if result.get("success"):
+                if result["count"] == 0:
+                    print("No missed tasks.")
+                else:
+                    print(f"Missed Tasks ({result['count']})")
+                    for t in result["tasks"]:
+                        print(f"  - {t['name']} ({t['id']})")
+                        print(f"    Should have run: {t['next_run']}")
+                        print(f"    Strategy: {t['missed_strategy']}")
+            else:
+                print(f"Error: {result.get('error')}", file=sys.stderr)
+                sys.exit(1)
+
         elif result.get("success"):
             if args.action == "create":
-                print(f"✅ Task created: {result['name']}")
+                print(f"Task created: {result['name']}")
                 print(f"   ID: {result['task_id']}")
                 print(f"   Schedule: {result['schedule']}")
-                print(f"   File: {result['file']}")
             elif args.action in ("enable", "disable"):
-                status = "enabled" if result["enabled"] else "disabled"
-                print(f"✅ Task {status}: {result['task_id']}")
+                status = "enabled" if result.get("enabled") else "disabled"
+                print(f"Task {status}: {result['task_id']}")
             elif args.action == "delete":
-                print(f"✅ Task deleted: {result['task_id']}")
+                print(f"Task deleted: {result['task_id']}")
+            elif args.action == "run":
+                print(f"Task executed: {args.id}")
+                if result.get("message"):
+                    print(f"   Result: {result['message']}")
         else:
-            print(f"❌ Error: {result['error']}", file=sys.stderr)
+            print(f"Error: {result.get('error')}", file=sys.stderr)
             sys.exit(1)
 
 

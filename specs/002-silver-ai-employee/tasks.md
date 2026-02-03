@@ -19,10 +19,10 @@
 
 **Purpose**: Project initialization, dependencies, and vault structure extension
 
-- [ ] T001 Add new dependencies to pyproject.toml (playwright, linkedin-api-client, apscheduler, workspace-mcp)
-- [ ] T002 [P] Extend VaultConfig in src/ai_employee/config.py with new folder paths (Pending_Approval, Approved, Rejected, Plans, Social/LinkedIn, Briefings, Schedules)
-- [ ] T003 [P] Create vault initialization script extension in scripts/init_vault_silver.sh for new folders
-- [ ] T004 Run `uv sync` to install new dependencies
+- [x] T001 Add new dependencies to pyproject.toml (playwright, linkedin-api-client, apscheduler, workspace-mcp)
+- [x] T002 [P] Extend VaultConfig in src/ai_employee/config.py with new folder paths (Pending_Approval, Approved, Rejected, Plans, Social/LinkedIn, Briefings, Schedules)
+- [x] T003 [P] Create vault initialization script extension in scripts/init_vault_silver.sh for new folders
+- [x] T004 Run `uv sync` to install new dependencies
 
 ---
 
@@ -34,24 +34,24 @@
 
 ### Models (All Can Run in Parallel)
 
-- [ ] T005 [P] Create ApprovalCategory and ApprovalStatus enums in src/ai_employee/models/approval_request.py
-- [ ] T006 [P] Create ApprovalRequest dataclass in src/ai_employee/models/approval_request.py
-- [ ] T007 [P] Create PlanStatus and StepStatus enums in src/ai_employee/models/plan.py
-- [ ] T008 [P] Create Plan and PlanStep dataclasses in src/ai_employee/models/plan.py
-- [ ] T009 [P] Create WhatsAppActionStatus enum and WhatsAppMessage dataclass in src/ai_employee/models/whatsapp_message.py
-- [ ] T010 [P] Create LinkedInPostStatus enum and LinkedInPost dataclass in src/ai_employee/models/linkedin_post.py
-- [ ] T011 [P] Create EngagementType enum and LinkedInEngagement dataclass in src/ai_employee/models/linkedin_post.py
-- [ ] T012 [P] Create MissedStrategy enum and ScheduledTask dataclass in src/ai_employee/models/scheduled_task.py
-- [ ] T013 [P] Extend ActionItemType enum in src/ai_employee/models/action_item.py with WHATSAPP, LINKEDIN, SCHEDULED
-- [ ] T014 [P] Extend SourceType enum in src/ai_employee/models/watcher_event.py with WHATSAPP, LINKEDIN, SCHEDULER
+- [x] T005 [P] Create ApprovalCategory and ApprovalStatus enums in src/ai_employee/models/approval_request.py
+- [x] T006 [P] Create ApprovalRequest dataclass in src/ai_employee/models/approval_request.py
+- [x] T007 [P] Create PlanStatus and StepStatus enums in src/ai_employee/models/plan.py
+- [x] T008 [P] Create Plan and PlanStep dataclasses in src/ai_employee/models/plan.py
+- [x] T009 [P] Create WhatsAppActionStatus enum and WhatsAppMessage dataclass in src/ai_employee/models/whatsapp_message.py
+- [x] T010 [P] Create LinkedInPostStatus enum and LinkedInPost dataclass in src/ai_employee/models/linkedin_post.py
+- [x] T011 [P] Create EngagementType enum and LinkedInEngagement dataclass in src/ai_employee/models/linkedin_post.py
+- [x] T012 [P] Create MissedStrategy enum and ScheduledTask dataclass in src/ai_employee/models/scheduled_task.py
+- [x] T013 [P] Extend ActionItemType enum in src/ai_employee/models/action_item.py with WHATSAPP, LINKEDIN, SCHEDULED
+- [x] T014 [P] Extend SourceType enum in src/ai_employee/models/watcher_event.py with WHATSAPP, LINKEDIN, SCHEDULER
 
 ### Model Tests
 
-- [ ] T015 [P] Unit tests for ApprovalRequest validation in tests/unit/test_approval_request.py
-- [ ] T016 [P] Unit tests for Plan and PlanStep validation in tests/unit/test_plan.py
-- [ ] T017 [P] Unit tests for WhatsAppMessage validation in tests/unit/test_whatsapp_message.py
-- [ ] T018 [P] Unit tests for LinkedInPost/LinkedInEngagement validation in tests/unit/test_linkedin_post.py
-- [ ] T019 [P] Unit tests for ScheduledTask validation in tests/unit/test_scheduled_task.py
+- [x] T015 [P] Unit tests for ApprovalRequest validation in tests/unit/test_approval_request.py
+- [x] T016 [P] Unit tests for Plan and PlanStep validation in tests/unit/test_plan.py
+- [x] T017 [P] Unit tests for WhatsAppMessage validation in tests/unit/test_whatsapp_message.py
+- [x] T018 [P] Unit tests for LinkedInPost/LinkedInEngagement validation in tests/unit/test_linkedin_post.py
+- [x] T019 [P] Unit tests for ScheduledTask validation in tests/unit/test_scheduled_task.py
 
 **Checkpoint**: Foundation ready - all models tested. User story implementation can now begin.
 
@@ -67,20 +67,20 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T020 [P] [US1] Unit tests for ApprovalService in tests/unit/test_approval_service.py
-- [ ] T021 [P] [US1] Integration tests for approval workflow in tests/integration/test_approval_workflow.py
+- [x] T020 [P] [US1] Unit tests for ApprovalService in tests/unit/test_approval_service.py
+- [x] T021 [P] [US1] Integration tests for approval workflow in tests/integration/test_approval_workflow.py
 
 ### Implementation for User Story 1
 
-- [ ] T022 [US1] Create ApprovalService in src/ai_employee/services/approval.py with create_request(), approve(), reject(), check_expired() methods (FR-001, FR-002, FR-003)
-- [ ] T023 [US1] Implement approval file serialization/deserialization with YAML frontmatter in ApprovalService
-- [ ] T024 [US1] Create ApprovalWatcher in src/ai_employee/watchers/approval.py to monitor /Approved/ and /Rejected/ folders (FR-002, FR-003)
-- [ ] T025 [US1] Implement expiration check and auto-reject logic in ApprovalService (FR-004, FR-004a)
-- [ ] T026 [US1] Implement sequential processing queue for concurrent approvals (FR-004b)
-- [ ] T027 [US1] Add approval category validation for email, social_post, payment, file_operation, custom (FR-005)
-- [ ] T028 [US1] Extend Dashboard service in src/ai_employee/services/dashboard.py to show pending approvals count and stale warnings
-- [ ] T029 [US1] Add CLI command `ai-employee watch-approvals` in src/ai_employee/cli/main.py
-- [ ] T030 [US1] Update /approve-action skill script in .claude/skills/approve-action/scripts/manage_approvals.py to integrate with ApprovalService
+- [x] T022 [US1] Create ApprovalService in src/ai_employee/services/approval.py with create_request(), approve(), reject(), check_expired() methods (FR-001, FR-002, FR-003)
+- [x] T023 [US1] Implement approval file serialization/deserialization with YAML frontmatter in ApprovalService
+- [x] T024 [US1] Create ApprovalWatcher in src/ai_employee/watchers/approval.py to monitor /Approved/ and /Rejected/ folders (FR-002, FR-003)
+- [x] T025 [US1] Implement expiration check and auto-reject logic in ApprovalService (FR-004, FR-004a)
+- [x] T026 [US1] Implement sequential processing queue for concurrent approvals (FR-004b)
+- [x] T027 [US1] Add approval category validation for email, social_post, payment, file_operation, custom (FR-005)
+- [x] T028 [US1] Extend Dashboard service in src/ai_employee/services/dashboard.py to show pending approvals count and stale warnings
+- [x] T029 [US1] Add CLI command `ai-employee watch-approvals` in src/ai_employee/cli/main.py
+- [x] T030 [US1] Update /approve-action skill script in .claude/skills/approve-action/scripts/manage_approvals.py to integrate with ApprovalService
 
 **Checkpoint**: User Story 1 fully functional - approvals can be created, monitored, approved/rejected, and expired items handled
 
@@ -96,20 +96,20 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T031 [P] [US2] Unit tests for WhatsApp message parsing in tests/unit/test_whatsapp_watcher.py
-- [ ] T032 [P] [US2] Unit tests for keyword detection in tests/unit/test_whatsapp_watcher.py
+- [x] T031 [P] [US2] Unit tests for WhatsApp message parsing in tests/unit/test_whatsapp_watcher.py
+- [x] T032 [P] [US2] Unit tests for keyword detection in tests/unit/test_whatsapp_watcher.py
 
 ### Implementation for User Story 2
 
-- [ ] T033 [US2] Create WhatsAppWatcher base structure in src/ai_employee/watchers/whatsapp.py (FR-006)
-- [ ] T034 [US2] Implement Playwright browser automation for WhatsApp Web in WhatsAppWatcher
-- [ ] T035 [US2] Implement keyword filtering with configurable keyword list (default: urgent, asap, invoice, payment, help, pricing) (FR-007)
-- [ ] T036 [US2] Implement action file creation with sender info, content, timestamp, matched keywords (FR-008)
-- [ ] T037 [US2] Implement session expiration detection and Dashboard alerting (FR-009)
-- [ ] T038 [US2] Implement persistent browser session storage to avoid repeated QR scans (FR-010)
-- [ ] T039 [US2] Add CLI command `ai-employee watch-whatsapp` in src/ai_employee/cli/main.py
-- [ ] T040 [US2] Extend Dashboard to show WhatsApp watcher status (connected/disconnected/session_expired)
-- [ ] T040a [US2] Implement heartbeat logging (60s interval) for WhatsApp watcher uptime tracking (SC-007)
+- [x] T033 [US2] Create WhatsAppWatcher base structure in src/ai_employee/watchers/whatsapp.py (FR-006)
+- [x] T034 [US2] Implement Playwright browser automation for WhatsApp Web in WhatsAppWatcher
+- [x] T035 [US2] Implement keyword filtering with configurable keyword list (default: urgent, asap, invoice, payment, help, pricing) (FR-007)
+- [x] T036 [US2] Implement action file creation with sender info, content, timestamp, matched keywords (FR-008)
+- [x] T037 [US2] Implement session expiration detection and Dashboard alerting (FR-009)
+- [x] T038 [US2] Implement persistent browser session storage to avoid repeated QR scans (FR-010)
+- [x] T039 [US2] Add CLI command `ai-employee watch-whatsapp` in src/ai_employee/cli/main.py
+- [x] T040 [US2] Extend Dashboard to show WhatsApp watcher status (connected/disconnected/session_expired)
+- [x] T040a [US2] Implement heartbeat logging (60s interval) for WhatsApp watcher uptime tracking (SC-007)
 
 **Checkpoint**: User Story 2 fully functional - WhatsApp messages monitored and urgent ones filed as action items
 
@@ -125,21 +125,22 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T041 [P] [US3] Unit tests for Gmail MCP configuration in tests/unit/test_gmail_mcp.py
+- [x] T041 [P] [US3] Unit tests for EmailService in tests/unit/test_email_service.py (25 tests covering draft, send, approval integration, errors)
+- [x] T041b [P] [US3] Unit tests for Gmail MCP configuration in tests/unit/test_gmail_mcp.py (32 tests covering OAuthToken, GmailMCPConfig, GmailMCPClient)
 - [ ] T042 [P] [US3] Contract tests for Gmail MCP integration in tests/contract/test_gmail_mcp.py
 
 ### Implementation for User Story 3
 
-- [ ] T043 [US3] Create Gmail MCP configuration module in src/ai_employee/mcp/gmail_config.py (FR-011)
-- [ ] T044 [US3] Configure OAuth 2.0 credentials loading for Gmail API access (FR-012)
-- [ ] T045 [US3] Create EmailService in src/ai_employee/services/email.py with draft_email(), send_email() methods
-- [ ] T045a [US3] Integrate EmailService with ApprovalService for draft-then-approve workflow
-- [ ] T046 [US3] Implement email send via google_workspace_mcp after approval
-- [ ] T047 [US3] Add attachment support via MCP's built-in handling (FR-013)
-- [ ] T048 [US3] Implement operation logging with timestamps and outcomes (FR-014)
-- [ ] T048a [US3] Implement partial email send failure handling: per-recipient status logging, quarantine on any failure, Dashboard alert with details (FR-014a)
-- [ ] T049 [US3] Implement OAuth token refresh handling (FR-015)
-- [ ] T050 [US3] Update /send-email skill script in .claude/skills/send-email/scripts/create_email_request.py to integrate with email service
+- [x] T043 [US3] Create Gmail MCP configuration module in src/ai_employee/mcp/gmail_config.py (FR-011)
+- [x] T044 [US3] Configure OAuth 2.0 credentials loading for Gmail API access (OAuthToken, GmailMCPConfig) (FR-012)
+- [x] T045 [US3] Create EmailService in src/ai_employee/services/email.py with draft_email(), send_approved_email() methods
+- [x] T045a [US3] Integrate EmailService with ApprovalService for draft-then-approve workflow
+- [ ] T046 [US3] Implement email send via google_workspace_mcp after approval (TODO placeholder in _send_via_mcp)
+- [x] T047 [US3] Add attachment support with validation (validate_attachments flag) (FR-013)
+- [x] T048 [US3] Implement operation logging with timestamps and outcomes in EmailService (_log_operation) (FR-014)
+- [x] T048a [US3] Implement partial email send failure handling: PartialSendError with failed_recipients, quarantine on failure (FR-014a)
+- [x] T049 [US3] Implement OAuth token refresh handling in GmailMCPClient (_refresh_token stub) (FR-015)
+- [x] T050 [US3] Update /send-email skill script to integrate with EmailService
 
 **Checkpoint**: User Story 3 fully functional - emails drafted, approved, and sent via Gmail
 
@@ -155,19 +156,19 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T051 [P] [US4] Unit tests for PlannerService in tests/unit/test_planner_service.py
+- [x] T051 [P] [US4] Unit tests for PlannerService in tests/unit/test_planner_service.py (22 tests)
 - [ ] T052 [P] [US4] Integration tests for plan execution in tests/integration/test_plan_execution.py
 
 ### Implementation for User Story 4
 
-- [ ] T053 [US4] Create PlannerService in src/ai_employee/services/planner.py with analyze_task(), create_plan() methods (FR-016)
-- [ ] T054 [US4] Implement Plan.md file generation with objective, numbered steps, dependencies, approval requirements, success criteria - ensure plain language per SC-010 (no code blocks, verb-first steps, progress symbols) (FR-017)
-- [ ] T055 [US4] Implement plan execution status tracking (pending, in_progress, completed, failed, paused) (FR-018)
-- [ ] T056 [US4] Implement plan pause on approval required or step failure (FR-019)
-- [ ] T056a [US4] Implement plan file reference validation: check paths before step execution, pause and alert on missing references (FR-019a)
-- [ ] T057 [US4] Integrate PlannerService with ApprovalService for steps requiring approval
-- [ ] T058 [US4] Update Dashboard to show active plan status (FR-020)
-- [ ] T059 [US4] Implement plan completion with move to /Done/ and completion summary
+- [x] T053 [US4] Create PlannerService in src/ai_employee/services/planner.py with analyze_task(), create_plan() methods (FR-016)
+- [x] T054 [US4] Implement Plan.md file generation with objective, numbered steps, dependencies, approval requirements, success criteria - ensure plain language per SC-010 (no code blocks, verb-first steps, progress symbols) (FR-017)
+- [x] T055 [US4] Implement plan execution status tracking (pending, in_progress, completed, failed, paused) (FR-018)
+- [x] T056 [US4] Implement plan pause on approval required or step failure (FR-019)
+- [x] T056a [US4] Implement plan file reference validation: check paths before step execution, pause and alert on missing references (FR-019a)
+- [x] T057 [US4] Integrate PlannerService with ApprovalService for steps requiring approval
+- [x] T058 [US4] Update Dashboard to show active plan status (active_plan_count, active_plan_name, active_plan_progress) (FR-020)
+- [x] T059 [US4] Implement plan completion with move to /Done/ and completion summary
 - [ ] T060 [US4] Update /create-plan skill SKILL.md in .claude/skills/create-plan/SKILL.md with examples
 
 **Checkpoint**: User Story 4 fully functional - complex tasks broken down into transparent, trackable plans

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""List and manage pending approval requests."""
+"""List and manage pending approval requests.
+
+This script integrates with the ApprovalService when available,
+falling back to direct file operations for compatibility.
+"""
 
 import argparse
 import json
@@ -15,6 +19,17 @@ def get_vault_path() -> Path:
     """Get vault path from environment or default."""
     vault = os.environ.get("VAULT_PATH", "~/AI_Employee_Vault")
     return Path(vault).expanduser()
+
+
+def get_approval_service(vault: Path):
+    """Try to get ApprovalService if ai_employee is installed."""
+    try:
+        from ai_employee.config import VaultConfig
+        from ai_employee.services.approval import ApprovalService
+        config = VaultConfig(root=vault)
+        return ApprovalService(config)
+    except ImportError:
+        return None
 
 
 def parse_frontmatter(content: str) -> dict:
@@ -41,6 +56,29 @@ def parse_frontmatter(content: str) -> dict:
 
 def list_approvals(vault: Path) -> dict:
     """List all pending approval requests."""
+    # Try using ApprovalService if available
+    service = get_approval_service(vault)
+    if service:
+        try:
+            requests = service.get_pending_requests()
+            approvals = []
+            for req in requests:
+                time_remaining = req.time_remaining()
+                hours = int(time_remaining.total_seconds() // 3600)
+                approvals.append({
+                    "id": req.id,
+                    "category": req.category.value,
+                    "file": str(vault / "Pending_Approval" / req.get_filename()),
+                    "created_at": req.created_at.isoformat(),
+                    "expires_at": req.expires_at.isoformat(),
+                    "time_remaining": f"{hours}h" if hours > 0 else "EXPIRED",
+                    "is_expired": req.is_expired(),
+                    "summary": req.summary or _get_summary_from_payload(req.category.value, req.payload)
+                })
+            return {"success": True, "count": len(approvals), "approvals": approvals}
+        except Exception:
+            pass  # Fall back to file-based approach
+
     pending_dir = vault / "Pending_Approval"
 
     if not pending_dir.exists():
@@ -103,6 +141,21 @@ def list_approvals(vault: Path) -> dict:
         "count": len(approvals),
         "approvals": approvals
     }
+
+
+def _get_summary_from_payload(category: str, payload: dict) -> str:
+    """Generate summary from payload based on category."""
+    if category == "email":
+        to = payload.get("to", "")[:20]
+        subject = payload.get("subject", "")[:20]
+        return f"To: {to}... Subject: {subject}..."
+    elif category == "social_post":
+        return "LinkedIn post"
+    elif category == "payment":
+        amount = payload.get("amount", 0)
+        recipient = payload.get("recipient", "")[:15]
+        return f"${amount} to {recipient}"
+    return ""
 
 
 def approve_request(approval_id: str, vault: Path) -> dict:
