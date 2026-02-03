@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2026-02-03
 
 ## Active Technologies
+- Python 3.13+ (matching Bronze tier) (002-silver-ai-employee)
+- File-based (Obsidian vault markdown files) - extending Bronze tier pattern (002-silver-ai-employee)
 
 - **Python 3.13+** with UV package manager (src layout)
 - **watchdog** - File system monitoring
@@ -136,6 +138,7 @@ Bronze Tier Personal AI Employee foundation:
 - Custom agents for automated inbox processing and watcher monitoring
 
 ## Recent Changes
+- 002-silver-ai-employee: Added Python 3.13+ (matching Bronze tier)
 
 - 001-bronze-ai-employee: Complete implementation of Bronze tier
   - File watcher with watchdog integration
