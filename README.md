@@ -2,6 +2,8 @@
 
 Personal AI Employee - Autonomous Digital FTE using Claude Code and Obsidian.
 
+![AI Employee Dashboard](docs/images/dashboard.png)
+
 ## Overview
 
 The AI Employee is a local-first automation system that:
@@ -102,6 +104,30 @@ Manually refresh the Dashboard.md:
 ```bash
 uv run ai-employee dashboard --vault ~/AI_Employee_Vault
 ```
+
+### Web Dashboard
+
+Start the Mission Control web dashboard:
+
+```bash
+# Install dashboard dependencies
+uv sync --extra dashboard
+
+# Start the dashboard server
+uv run ai-employee web --port 8000
+```
+
+Then open http://127.0.0.1:8000 in your browser.
+
+Features:
+- **Status Overview** - Inbox, Needs Action, Completed, Quarantine counts
+- **Pending Approvals** - Approve/reject emails and social posts with one click
+- **Quick Actions** - Send emails, post to LinkedIn, create plans
+- **Scheduled Tasks** - View all scheduled cron tasks
+- **Active Plans** - Track plan progress
+- **Watcher Status** - Monitor all watchers in real-time
+
+API documentation available at http://127.0.0.1:8000/docs
 
 ## Claude Code Skills
 
