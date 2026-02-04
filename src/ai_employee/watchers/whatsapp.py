@@ -239,12 +239,13 @@ class WhatsAppWatcher(BaseWatcher):
             # Use persistent context to maintain session (FR-010)
             self._session_path.mkdir(parents=True, exist_ok=True)
 
-            self._browser = await playwright.chromium.launch_persistent_context(
+            browser = await playwright.chromium.launch_persistent_context(
                 user_data_dir=str(self._session_path),
                 headless=False,  # WhatsApp Web requires visible browser
             )
+            self._browser = browser
 
-            page = await self._browser.new_page()
+            page = await browser.new_page()
             self._page = page
             await page.goto("https://web.whatsapp.com")
 

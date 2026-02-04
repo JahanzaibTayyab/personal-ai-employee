@@ -1,11 +1,18 @@
 """Dashboard service - updates Dashboard.md with current status."""
 
+from __future__ import annotations
+
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING, Any
 
 from ai_employee.config import VaultConfig
 from ai_employee.models.activity_log import ActivityLogEntry, Outcome
 from ai_employee.models.dashboard import DashboardState
 from ai_employee.utils.jsonl_logger import JsonlLogger
+
+if TYPE_CHECKING:
+    from ai_employee.services.approval import ApprovalService
+    from ai_employee.services.planner import PlannerService
 
 
 class DashboardService:
@@ -27,8 +34,8 @@ class DashboardService:
             serializer=lambda e: e.to_json(),
             deserializer=ActivityLogEntry.from_json,
         )
-        self._approval_service = None
-        self._planner_service = None
+        self._approval_service: ApprovalService | None = None
+        self._planner_service: PlannerService | None = None
 
     def _get_approval_service(self) -> "ApprovalService":
         """Lazy load ApprovalService to avoid circular imports."""

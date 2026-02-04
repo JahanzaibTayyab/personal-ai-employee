@@ -44,7 +44,7 @@ class ApprovalEventHandler(FileSystemEventHandler):
         if event.is_directory:
             return
 
-        path = Path(event.src_path)
+        path = Path(str(event.src_path))
         if not self._is_approval_file(path):
             return
 
@@ -58,13 +58,13 @@ class ApprovalEventHandler(FileSystemEventHandler):
         elif parent == "Rejected":
             self._watcher._on_approval_rejected(path)
 
-    def on_moved(self, event: FileMovedEvent) -> None:
+    def on_moved(self, event: DirMovedEvent | FileMovedEvent) -> None:
         """Handle file move events (user approval/rejection)."""
         if event.is_directory:
             return
 
-        src_path = Path(event.src_path)
-        dest_path = Path(event.dest_path)
+        src_path = Path(str(event.src_path))
+        dest_path = Path(str(event.dest_path))
 
         if not self._is_approval_file(dest_path):
             return
@@ -84,7 +84,7 @@ class ApprovalWatcher(BaseWatcher):
         """Initialize approval folder watcher."""
         super().__init__(vault_config.root, SourceType.APPROVAL)
         self._config = vault_config
-        self._observer: Observer | None = None
+        self._observer: Any = None
         self._service = ApprovalService(vault_config)
 
         # Callback hooks for external consumers

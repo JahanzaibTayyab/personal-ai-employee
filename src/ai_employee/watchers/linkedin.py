@@ -3,11 +3,17 @@
 Uses LinkedIn API to poll for new engagement on posts.
 """
 
+from __future__ import annotations
+
+import os
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ai_employee.config import VaultConfig
+
+if TYPE_CHECKING:
+    from linkedin_api import Linkedin
 from ai_employee.models.linkedin_post import (
     EngagementType,
     LinkedInEngagement,
@@ -47,6 +53,8 @@ class LinkedInEngagementWatcher:
         self._status = LinkedInWatcherStatus.DISCONNECTED
         self._last_heartbeat: datetime | None = None
         self._running = False
+        self._api_client: Linkedin | None = None
+        self._seen_engagements: set[str] = set()
         self._logger = JsonlLogger[dict](
             logs_dir=vault_config.logs,
             prefix="watcher",
@@ -180,6 +188,110 @@ class LinkedInEngagementWatcher:
         # Log heartbeat
         self._log_heartbeat()
 
-        # TODO: Implement actual API polling
-        # For now, return empty list
-        return []
+        # Initialize API client if needed
+        if not self._api_client:
+            if not self._init_api_client():
+                return []
+
+        engagements: list[LinkedInEngagement] = []
+
+        try:
+            # Get notifications from LinkedIn (includes engagement)
+            if self._api_client:
+                notifications = self._api_client.get_notifications() or []
+
+                for notif in notifications:
+                    notif_id = notif.get("id", "")
+
+                    # Skip already processed
+                    if notif_id in self._seen_engagements:
+                        continue
+
+                    self._seen_engagements.add(notif_id)
+
+                    # Process notification into engagement
+                    engagement = self._notification_to_engagement(notif)
+                    if engagement:
+                        engagements.append(engagement)
+
+                        # Track high-priority engagement
+                        if engagement.requires_followup:
+                            self._linkedin_service.track_engagement(engagement)
+
+        except Exception as e:
+            self._log_event("poll_error", {"error": str(e)})
+
+        return engagements
+
+    def _init_api_client(self) -> bool:
+        """Initialize LinkedIn API client.
+
+        Returns:
+            True if initialization successful
+        """
+        email = os.environ.get("LINKEDIN_EMAIL")
+        password = os.environ.get("LINKEDIN_PASSWORD")
+
+        if not email or not password:
+            self._log_event("init_error", {
+                "error": "LINKEDIN_EMAIL and LINKEDIN_PASSWORD required"
+            })
+            return False
+
+        try:
+            from linkedin_api import Linkedin
+            self._api_client = Linkedin(email, password)
+            self._log_event("api_initialized", {"email": email})
+            return True
+        except ImportError:
+            self._log_event("init_error", {
+                "error": "linkedin-api package not installed"
+            })
+            return False
+        except Exception as e:
+            self._log_event("init_error", {"error": str(e)})
+            return False
+
+    def _notification_to_engagement(
+        self,
+        notif: dict[str, Any],
+    ) -> LinkedInEngagement | None:
+        """Convert LinkedIn notification to engagement.
+
+        Args:
+            notif: Notification data from LinkedIn API
+
+        Returns:
+            LinkedInEngagement or None if not relevant
+        """
+        try:
+            notif_type = notif.get("type", "").lower()
+            content = notif.get("text", "") or notif.get("body", "")
+            author = notif.get("actor", {}).get("name", "Unknown")
+
+            # Map notification type to engagement type
+            eng_type = EngagementType.COMMENT
+            if "like" in notif_type or "reaction" in notif_type:
+                eng_type = EngagementType.LIKE
+            elif "share" in notif_type or "repost" in notif_type:
+                eng_type = EngagementType.SHARE
+            elif "mention" in notif_type:
+                eng_type = EngagementType.MENTION
+
+            # Detect keywords for follow-up
+            keywords = detect_engagement_keywords(content)
+            requires_followup = len(keywords) > 0
+
+            return LinkedInEngagement(
+                id=notif.get("id", f"eng_{datetime.now().timestamp()}"),
+                post_id=notif.get("postId", ""),
+                engagement_type=eng_type,
+                author=author,
+                content=content,
+                timestamp=datetime.now(),
+                requires_followup=requires_followup,
+                followup_keywords=keywords,
+            )
+        except Exception as e:
+            self._log_event("parse_error", {"error": str(e)})
+            return None

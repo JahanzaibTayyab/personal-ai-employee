@@ -104,6 +104,7 @@ def cmd_watch_approvals(args: argparse.Namespace) -> int:
     import time
 
     from ai_employee.config import VaultConfig
+    from ai_employee.models.approval_request import ApprovalRequest
     from ai_employee.services.approval import ApprovalService
     from ai_employee.watchers.approval import ApprovalWatcher
 
@@ -126,10 +127,10 @@ def cmd_watch_approvals(args: argparse.Namespace) -> int:
     watcher = ApprovalWatcher(config)
 
     # Set up callbacks
-    def on_approved(request):
+    def on_approved(request: ApprovalRequest) -> None:
         print(f"[APPROVED] {request.category.value}: {request.id}")
 
-    def on_rejected(request):
+    def on_rejected(request: ApprovalRequest) -> None:
         print(f"[REJECTED] {request.category.value}: {request.id}")
 
     watcher.on_approval_approved = on_approved
@@ -174,6 +175,7 @@ def cmd_watch_whatsapp(args: argparse.Namespace) -> int:
         Exit code (0 for success)
     """
     from ai_employee.config import VaultConfig
+    from ai_employee.models.whatsapp_message import WhatsAppMessage
     from ai_employee.watchers.whatsapp import WhatsAppWatcher, WhatsAppWatcherStatus
 
     vault_path = Path(args.vault).expanduser().resolve()
@@ -194,11 +196,11 @@ def cmd_watch_whatsapp(args: argparse.Namespace) -> int:
     watcher = WhatsAppWatcher(config, keywords=keywords)
 
     # Set up callbacks
-    def on_message(message):
+    def on_message(message: WhatsAppMessage) -> None:
         print(f"[DETECTED] {message.sender}: {message.content[:50]}...")
         print(f"           Keywords: {', '.join(message.keywords)}")
 
-    def on_status(status):
+    def on_status(status: WhatsAppWatcherStatus) -> None:
         status_msg = {
             WhatsAppWatcherStatus.CONNECTING: "Connecting to WhatsApp Web...",
             WhatsAppWatcherStatus.QR_REQUIRED: "Please scan QR code in browser",

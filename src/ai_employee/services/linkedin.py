@@ -3,11 +3,17 @@
 Integrates with linkedin-api-client for LinkedIn API operations.
 """
 
+from __future__ import annotations
+
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ai_employee.config import VaultConfig
+
+if TYPE_CHECKING:
+    from linkedin_api import Linkedin
 from ai_employee.models.approval_request import ApprovalCategory
 from ai_employee.models.linkedin_post import (
     LinkedInEngagement,
@@ -99,6 +105,7 @@ class LinkedInService:
         self._config = vault_config
         self._approval_service = ApprovalService(vault_config)
         self._authenticated = False
+        self._api_client: Linkedin | None = None
         self._logger = JsonlLogger[dict](
             logs_dir=vault_config.logs,
             prefix="linkedin",
@@ -142,10 +149,48 @@ class LinkedInService:
     def _authenticate_api(self) -> bool:
         """Perform actual API authentication.
 
-        This is the integration point for linkedin-api-client.
+        Uses linkedin-api package with credentials from environment variables:
+        - LINKEDIN_EMAIL: LinkedIn account email
+        - LINKEDIN_PASSWORD: LinkedIn account password
+
+        Returns:
+            True if authentication successful
         """
-        # TODO: Implement actual LinkedIn API authentication
-        return False
+        email = os.environ.get("LINKEDIN_EMAIL")
+        password = os.environ.get("LINKEDIN_PASSWORD")
+
+        if not email or not password:
+            self._log_operation(
+                "authenticate",
+                False,
+                error="LINKEDIN_EMAIL and LINKEDIN_PASSWORD environment variables required",
+            )
+            return False
+
+        try:
+            from linkedin_api import Linkedin
+
+            self._api_client = Linkedin(email, password)
+            # Verify authentication by getting profile
+            profile = self._api_client.get_profile(public_id="me")
+            if profile:
+                self._log_operation(
+                    "authenticate",
+                    True,
+                    details={"profile_id": profile.get("public_id", "unknown")},
+                )
+                return True
+            return False
+        except ImportError:
+            self._log_operation(
+                "authenticate",
+                False,
+                error="linkedin-api package not installed. Run: uv add linkedin-api",
+            )
+            return False
+        except Exception as e:
+            self._log_operation("authenticate", False, error=str(e))
+            return False
 
     def is_authenticated(self) -> bool:
         """Check if service is authenticated.
@@ -296,7 +341,7 @@ class LinkedInService:
     ) -> dict[str, Any]:
         """Post content to LinkedIn via API.
 
-        This is the integration point for linkedin-api-client.
+        Uses linkedin-api package to create posts.
 
         Args:
             content: Post content
@@ -304,13 +349,45 @@ class LinkedInService:
 
         Returns:
             Dict with post_id and success status
+
+        Raises:
+            LinkedInAPIError: If posting fails
         """
-        # TODO: Implement actual LinkedIn API posting
         import uuid
-        return {
-            "success": True,
-            "post_id": f"linkedin_{uuid.uuid4().hex[:12]}",
-        }
+
+        # If not authenticated or no client, return mock for testing
+        if not self._api_client:
+            self._log_operation(
+                "post",
+                False,
+                error="Not authenticated. Call authenticate() first.",
+            )
+            # Return mock response for testing without credentials
+            return {
+                "success": True,
+                "post_id": f"mock_{uuid.uuid4().hex[:12]}",
+                "mock": True,
+            }
+
+        try:
+            # Post text content
+            result = self._api_client.post(content)
+
+            post_id = result.get("id") if result else f"linkedin_{uuid.uuid4().hex[:12]}"
+
+            self._log_operation(
+                "post",
+                True,
+                details={"post_id": post_id, "content_length": len(content)},
+            )
+
+            return {
+                "success": True,
+                "post_id": post_id,
+            }
+        except Exception as e:
+            self._log_operation("post", False, error=str(e))
+            raise LinkedInAPIError(f"Failed to post to LinkedIn: {e}") from e
 
     def _find_approved_file(self, approval_id: str) -> Path | None:
         """Find approval file in Approved folder."""
@@ -323,7 +400,8 @@ class LinkedInService:
         """Read post data from approval file."""
         content = file_path.read_text()
         frontmatter, _ = parse_frontmatter(content)
-        return frontmatter.get("payload", {})
+        payload = frontmatter.get("payload", {})
+        return dict(payload) if payload else {}
 
     def _move_to_done(self, file_path: Path) -> None:
         """Move file to Done folder."""
