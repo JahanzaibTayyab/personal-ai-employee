@@ -70,3 +70,6 @@ credentials.json
 token.json
 *.key
 *.pem
+src/credentials.json
+gmail_token.json
+src/gmail_token.json

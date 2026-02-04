@@ -373,7 +373,11 @@ class GmailMCPClient:
         Returns:
             True if authenticated with valid token
         """
-        return self._authenticated and self.config.has_valid_token()
+        # If we already authenticated in this session, trust that
+        if self._authenticated:
+            return True
+        # Otherwise check for valid token on disk
+        return self.config.has_valid_token()
 
     def send_email(
         self,
