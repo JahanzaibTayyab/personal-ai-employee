@@ -70,3 +70,12 @@ credentials.json
 token.json
 *.key
 *.pem
+src/credentials.json
+gmail_token.json
+src/gmail_token.json
+
+# Config folder secrets
+config/credentials.json
+config/gmail_token.json
+config/token.json
+config/whatsapp_session/

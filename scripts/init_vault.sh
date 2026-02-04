@@ -8,13 +8,24 @@ VAULT_PATH="${1:-$HOME/AI_Employee_Vault}"
 
 echo "Initializing AI Employee Vault at: $VAULT_PATH"
 
-# Create directories
+# Create Bronze tier directories
 mkdir -p "$VAULT_PATH/Inbox"
 mkdir -p "$VAULT_PATH/Needs_Action/Email"
 mkdir -p "$VAULT_PATH/Done"
 mkdir -p "$VAULT_PATH/Drop"
 mkdir -p "$VAULT_PATH/Quarantine"
 mkdir -p "$VAULT_PATH/Logs"
+
+# Create Silver tier directories
+mkdir -p "$VAULT_PATH/Pending_Approval"
+mkdir -p "$VAULT_PATH/Approved"
+mkdir -p "$VAULT_PATH/Rejected"
+mkdir -p "$VAULT_PATH/Plans"
+mkdir -p "$VAULT_PATH/Needs_Action/WhatsApp"
+mkdir -p "$VAULT_PATH/Needs_Action/LinkedIn"
+mkdir -p "$VAULT_PATH/Social/LinkedIn/posts"
+mkdir -p "$VAULT_PATH/Briefings"
+mkdir -p "$VAULT_PATH/Schedules"
 
 # Create Dashboard.md if not exists
 if [ ! -f "$VAULT_PATH/Dashboard.md" ]; then
@@ -28,6 +39,16 @@ if [ ! -f "$VAULT_PATH/Dashboard.md" ]; then
 - **Watcher**: Not started
 - **Pending Items**: 0
 - **Processed Today**: 0
+
+## Approval Queue
+
+- **Pending Approvals**: 0
+- **Approved Today**: 0
+- **Rejected Today**: 0
+
+## Active Plans
+
+No active plans.
 
 ## Recent Activity
 
@@ -86,6 +107,23 @@ If an error occurs during processing:
 - Continue processing remaining items
 - Report errors in the Dashboard warnings section
 
+### Rule 7: Approval Workflow (Silver Tier)
+Sensitive actions require human approval before execution:
+- **Email sending**: All outbound emails need approval
+- **Social posts**: LinkedIn posts need approval before publishing
+- **Payments**: Any financial transactions need approval
+Move items to /Pending_Approval/ and wait for user to move to /Approved/ or /Rejected/
+
+### Rule 8: WhatsApp Monitoring (Silver Tier)
+Monitor WhatsApp for keywords indicating urgent business needs:
+- "urgent", "asap", "invoice", "payment", "help", "pricing"
+Create action items in /Needs_Action/WhatsApp/ for messages matching keywords
+
+### Rule 9: LinkedIn Engagement (Silver Tier)
+Monitor LinkedIn engagement for business opportunities:
+- Keywords: "interested", "pricing", "demo", "contact", "inquiry"
+Create action items in /Needs_Action/LinkedIn/ for high-priority engagement
+
 ## Contact Information
 
 **Owner**: [Your Name]
@@ -104,14 +142,24 @@ fi
 echo ""
 echo "Vault initialized successfully!"
 echo ""
-echo "Created folders:"
+echo "Bronze Tier Folders:"
 echo "  - Inbox/"
-echo "  - Needs_Action/"
 echo "  - Needs_Action/Email/"
 echo "  - Done/"
 echo "  - Drop/"
 echo "  - Quarantine/"
 echo "  - Logs/"
+echo ""
+echo "Silver Tier Folders:"
+echo "  - Pending_Approval/"
+echo "  - Approved/"
+echo "  - Rejected/"
+echo "  - Plans/"
+echo "  - Needs_Action/WhatsApp/"
+echo "  - Needs_Action/LinkedIn/"
+echo "  - Social/LinkedIn/posts/"
+echo "  - Briefings/"
+echo "  - Schedules/"
 echo ""
 echo "Created files:"
 echo "  - Dashboard.md"
@@ -121,3 +169,4 @@ echo "Next steps:"
 echo "  1. Open $VAULT_PATH in Obsidian"
 echo "  2. Start the watcher: uv run ai-employee watch --vault $VAULT_PATH"
 echo "  3. Drop files into $VAULT_PATH/Drop/ to test"
+echo "  4. Use skills: /post-linkedin, /send-email, /create-plan, /approve-action, /schedule-task"

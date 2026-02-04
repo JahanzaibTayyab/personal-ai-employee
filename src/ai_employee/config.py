@@ -56,9 +56,65 @@ class VaultConfig:
         """Path to Company_Handbook.md."""
         return self.root / "Company_Handbook.md"
 
+    # Silver Tier: Approval Workflow
+    @property
+    def pending_approval(self) -> Path:
+        """Path to Pending_Approval folder for items awaiting human approval."""
+        return self.root / "Pending_Approval"
+
+    @property
+    def approved(self) -> Path:
+        """Path to Approved folder for approved items."""
+        return self.root / "Approved"
+
+    @property
+    def rejected(self) -> Path:
+        """Path to Rejected folder for rejected items."""
+        return self.root / "Rejected"
+
+    # Silver Tier: Planning
+    @property
+    def plans(self) -> Path:
+        """Path to Plans folder for active Plan.md files."""
+        return self.root / "Plans"
+
+    # Silver Tier: WhatsApp
+    @property
+    def needs_action_whatsapp(self) -> Path:
+        """Path to Needs_Action/WhatsApp folder."""
+        return self.root / "Needs_Action" / "WhatsApp"
+
+    # Silver Tier: LinkedIn
+    @property
+    def needs_action_linkedin(self) -> Path:
+        """Path to Needs_Action/LinkedIn folder for high-priority engagement."""
+        return self.root / "Needs_Action" / "LinkedIn"
+
+    @property
+    def social_linkedin(self) -> Path:
+        """Path to Social/LinkedIn folder."""
+        return self.root / "Social" / "LinkedIn"
+
+    @property
+    def social_linkedin_posts(self) -> Path:
+        """Path to Social/LinkedIn/posts folder."""
+        return self.root / "Social" / "LinkedIn" / "posts"
+
+    # Silver Tier: Scheduling
+    @property
+    def briefings(self) -> Path:
+        """Path to Briefings folder for generated briefings."""
+        return self.root / "Briefings"
+
+    @property
+    def schedules(self) -> Path:
+        """Path to Schedules folder for schedule configurations."""
+        return self.root / "Schedules"
+
     def ensure_structure(self) -> None:
         """Create all required vault folders if they don't exist."""
         folders = [
+            # Bronze tier folders
             self.inbox,
             self.needs_action,
             self.needs_action_email,
@@ -66,6 +122,17 @@ class VaultConfig:
             self.drop,
             self.quarantine,
             self.logs,
+            # Silver tier folders
+            self.pending_approval,
+            self.approved,
+            self.rejected,
+            self.plans,
+            self.needs_action_whatsapp,
+            self.needs_action_linkedin,
+            self.social_linkedin,
+            self.social_linkedin_posts,
+            self.briefings,
+            self.schedules,
         ]
         for folder in folders:
             folder.mkdir(parents=True, exist_ok=True)

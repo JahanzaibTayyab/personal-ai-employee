@@ -13,6 +13,7 @@ class DashboardState:
     Sections:
     - Status: Watcher state, pending count, today's processed count
     - Recent Activity: Last 10 activity log entries as table
+    - Pending Approvals: Approval requests awaiting action (Silver tier)
     - Warnings: Error alerts if threshold exceeded
     """
 
@@ -23,6 +24,17 @@ class DashboardState:
     recent_activity: list[ActivityLogEntry] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     error_count_hour: int = 0
+    # Silver tier: Approval workflow
+    pending_approvals_count: int = 0
+    stale_approvals_count: int = 0
+    approval_watcher_status: str = "unknown"
+    # Silver tier: WhatsApp watcher
+    whatsapp_watcher_status: str = "disconnected"
+    whatsapp_messages_today: int = 0
+    # Silver tier: Plan status
+    active_plan_count: int = 0
+    active_plan_name: str | None = None
+    active_plan_progress: str | None = None  # e.g., "2/5 steps"
 
     def to_markdown(self) -> str:
         """Generate Dashboard.md content from state."""
@@ -36,12 +48,52 @@ class DashboardState:
             f"- **Watcher**: {self.watcher_status}",
             f"- **Pending Items**: {self.pending_count}",
             f"- **Processed Today**: {self.processed_today}",
+        ]
+
+        # Silver tier: Approval status
+        if self.pending_approvals_count > 0 or self.stale_approvals_count > 0:
+            lines.extend([
+                "",
+                "## Pending Approvals",
+                "",
+                f"- **Awaiting Approval**: {self.pending_approvals_count}",
+            ])
+            if self.stale_approvals_count > 0:
+                lines.append(
+                    f"- **Stale (expiring soon)**: {self.stale_approvals_count}"
+                )
+            lines.append(f"- **Approval Watcher**: {self.approval_watcher_status}")
+
+        # Silver tier: WhatsApp status
+        if self.whatsapp_watcher_status != "disconnected" or self.whatsapp_messages_today > 0:
+            lines.extend([
+                "",
+                "## WhatsApp Monitor",
+                "",
+                f"- **Status**: {self.whatsapp_watcher_status}",
+                f"- **Messages Today**: {self.whatsapp_messages_today}",
+            ])
+
+        # Silver tier: Active plans
+        if self.active_plan_count > 0:
+            lines.extend([
+                "",
+                "## Active Plans",
+                "",
+                f"- **Active Plans**: {self.active_plan_count}",
+            ])
+            if self.active_plan_name:
+                lines.append(f"- **Current**: {self.active_plan_name}")
+            if self.active_plan_progress:
+                lines.append(f"- **Progress**: {self.active_plan_progress}")
+
+        lines.extend([
             "",
             "## Recent Activity",
             "",
             "| Time | Action | Item | Result |",
             "|------|--------|------|--------|",
-        ]
+        ])
 
         if self.recent_activity:
             for entry in self.recent_activity[:10]:

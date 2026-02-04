@@ -10,8 +10,14 @@ from typing import Any
 class SourceType(str, Enum):
     """Source type of the watcher."""
 
+    # Bronze tier sources
     FILESYSTEM = "filesystem"
     GMAIL = "gmail"
+    # Silver tier sources
+    WHATSAPP = "whatsapp"
+    LINKEDIN = "linkedin"
+    SCHEDULER = "scheduler"
+    APPROVAL = "approval"
 
 
 class EventType(str, Enum):
@@ -23,6 +29,9 @@ class EventType(str, Enum):
     ERROR = "error"
     STARTED = "started"
     STOPPED = "stopped"
+    # Silver tier event types
+    DETECTED = "detected"
+    PROCESSED = "processed"
 
 
 @dataclass
