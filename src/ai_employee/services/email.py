@@ -399,8 +399,15 @@ class EmailService:
                     ],
                 )
 
+            # Get token path from environment
+            token_path = os.environ.get("GMAIL_TOKEN_PATH")
+            token_path_obj = Path(token_path).expanduser() if token_path else None
+
             # Initialize Gmail client with config
-            config = GmailMCPConfig(credentials_path=creds_path)
+            config = GmailMCPConfig(
+                credentials_path=creds_path,
+                token_path=token_path_obj,
+            )
             client = GmailMCPClient(config)
 
             # Attempt authentication

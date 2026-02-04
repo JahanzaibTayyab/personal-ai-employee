@@ -112,13 +112,46 @@ async def get_approvals() -> dict[str, Any]:
 
 @app.post("/api/approvals/{approval_id}/approve")
 async def approve_request(approval_id: str) -> dict[str, Any]:
-    """Approve a pending request."""
+    """Approve and execute a pending request."""
     config = get_vault_config()
-    service = ApprovalService(config)
+    approval_service = ApprovalService(config)
 
     try:
-        result = service.approve_request(approval_id)
-        return {"success": True, "message": f"Approved: {approval_id}"}
+        # First approve the request (moves to Approved folder)
+        approved = approval_service.approve_request(approval_id)
+
+        # Then execute the action based on category
+        execution_result = {"executed": False, "details": None}
+
+        if approved.category == ApprovalCategory.EMAIL:
+            # Execute email send
+            email_service = EmailService(config)
+            try:
+                result = email_service.send_approved_email(approval_id)
+                execution_result = {
+                    "executed": True,
+                    "details": f"Email sent to {', '.join(approved.payload.get('to', []))}"
+                }
+            except Exception as e:
+                execution_result = {"executed": False, "error": str(e)}
+
+        elif approved.category == ApprovalCategory.SOCIAL_POST:
+            # Execute LinkedIn post
+            linkedin_service = LinkedInService(config)
+            try:
+                result = linkedin_service.post_approved(approval_id)
+                execution_result = {
+                    "executed": True,
+                    "details": "LinkedIn post published"
+                }
+            except Exception as e:
+                execution_result = {"executed": False, "error": str(e)}
+
+        return {
+            "success": True,
+            "message": f"Approved: {approval_id}",
+            "execution": execution_result
+        }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
