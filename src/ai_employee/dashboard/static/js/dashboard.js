@@ -334,15 +334,72 @@ async function postLinkedIn(event) {
 async function createPlan(event) {
     event.preventDefault();
 
-    // Note: Plan creation would typically trigger Claude reasoning loop
-    // For now, show a message indicating this needs CLI/Agent interaction
-    showToast('Plan creation requires Claude Agent. Use /create-plan skill.', 'info');
-    closeModal('plan-modal');
+    const task = document.getElementById('plan-objective').value;
+    const description = document.getElementById('plan-description').value;
+
+    // Parse description into steps if it contains numbered items
+    let steps = [];
+    if (description) {
+        const lines = description.split('\n').filter(l => l.trim());
+        steps = lines.map(l => l.replace(/^\d+[\.\)]\s*/, '').trim()).filter(s => s);
+    }
+
+    try {
+        const response = await fetch('/api/plans/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                task: task,
+                objective: task,
+                steps: steps.length > 0 ? steps : [task]
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            showToast(`Plan created: ${data.plan_id} (${data.steps_count} steps)`, 'success');
+            closeModal('plan-modal');
+            document.getElementById('plan-form').reset();
+            fetchPlans();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Failed to create plan', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
 }
 
-function runProcessInbox() {
-    // Note: This would trigger the inbox processing workflow
-    showToast('Inbox processing requires Claude Agent. Use /process-inbox skill.', 'info');
+async function runProcessInbox() {
+    showToast('Processing inbox...', 'info');
+
+    try {
+        const response = await fetch('/api/inbox/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ max_items: 5 })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.processed === 0) {
+                showToast('No items to process', 'info');
+            } else {
+                showToast(`Processed ${data.success_count} items (${data.failed_count} failed, ${data.remaining} remaining)`, 'success');
+            }
+            // Refresh status to update counts
+            fetchStatus();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Failed to process inbox', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
 }
 
 // Utility functions

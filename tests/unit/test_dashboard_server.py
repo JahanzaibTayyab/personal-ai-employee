@@ -212,6 +212,104 @@ payload:
         assert "approval_id" in response.json()
 
 
+class TestProcessInboxEndpoint:
+    """Test process inbox API endpoint."""
+
+    @pytest.fixture
+    def client(self):
+        """Create test client."""
+        from fastapi.testclient import TestClient
+        from ai_employee.dashboard.server import app
+
+        return TestClient(app)
+
+    @pytest.fixture
+    def mock_vault(self, tmp_path):
+        """Create mock vault structure."""
+        vault = tmp_path / "vault"
+        vault.mkdir()
+        (vault / "Inbox").mkdir()
+        (vault / "Needs_Action").mkdir()
+        (vault / "Done").mkdir()
+        (vault / "Quarantine").mkdir()
+        (vault / "Logs").mkdir()
+        return vault
+
+    def test_process_inbox_empty(self, client, mock_vault, monkeypatch):
+        """Process inbox should handle empty queue."""
+        monkeypatch.setenv("VAULT_PATH", str(mock_vault))
+
+        response = client.post("/api/inbox/process", json={"max_items": 5})
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["success"] is True
+        assert data["processed"] == 0
+
+    def test_process_inbox_with_items(self, client, mock_vault, monkeypatch):
+        """Process inbox should process pending items."""
+        monkeypatch.setenv("VAULT_PATH", str(mock_vault))
+
+        # Create a test item
+        test_item = mock_vault / "Needs_Action" / "test_item.md"
+        test_item.write_text("""---
+type: file
+priority: normal
+---
+# Test Item
+""")
+
+        response = client.post("/api/inbox/process", json={"max_items": 5})
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["success"] is True
+
+
+class TestCreatePlanEndpoint:
+    """Test create plan API endpoint."""
+
+    @pytest.fixture
+    def client(self):
+        """Create test client."""
+        from fastapi.testclient import TestClient
+        from ai_employee.dashboard.server import app
+
+        return TestClient(app)
+
+    @pytest.fixture
+    def mock_vault(self, tmp_path):
+        """Create mock vault structure."""
+        vault = tmp_path / "vault"
+        vault.mkdir()
+        (vault / "Plans").mkdir()
+        (vault / "Logs").mkdir()
+        return vault
+
+    def test_create_plan(self, client, mock_vault, monkeypatch):
+        """Create plan endpoint should create a new plan."""
+        monkeypatch.setenv("VAULT_PATH", str(mock_vault))
+
+        response = client.post("/api/plans/create", json={
+            "task": "Test Task",
+            "objective": "Test Objective",
+            "steps": ["Step 1", "Step 2"]
+        })
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["success"] is True
+        assert "plan_id" in data
+        assert data["steps_count"] == 2
+
+    def test_create_plan_missing_fields(self, client, mock_vault, monkeypatch):
+        """Create plan should fail without required fields."""
+        monkeypatch.setenv("VAULT_PATH", str(mock_vault))
+
+        response = client.post("/api/plans/create", json={})
+        assert response.status_code == 400
+
+
 class TestStaticFiles:
     """Test static file serving."""
 

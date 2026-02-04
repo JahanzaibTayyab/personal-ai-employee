@@ -29,6 +29,7 @@ from ai_employee.services.scheduler import SchedulerService
 from ai_employee.services.planner import PlannerService
 from ai_employee.services.email import EmailService, EmailDraft
 from ai_employee.services.linkedin import LinkedInService
+from ai_employee.services.processor import ItemProcessor
 from ai_employee.models.approval_request import ApprovalCategory
 
 app = FastAPI(title="AI Employee Dashboard", version="1.0.0")
@@ -259,6 +260,95 @@ async def create_linkedin_post(request: Request) -> dict[str, Any]:
             scheduled_time=datetime.now(),
         )
         return {"success": True, "approval_id": approval_id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/inbox/process")
+async def process_inbox(request: Request) -> dict[str, Any]:
+    """Process pending items in the inbox."""
+    config = get_vault_config()
+    processor = ItemProcessor(config)
+
+    try:
+        # Get pending items
+        pending = processor.get_pending_items()
+        pending_count = len(pending)
+
+        if pending_count == 0:
+            return {
+                "success": True,
+                "message": "No items to process",
+                "processed": 0,
+                "success_count": 0,
+                "failed_count": 0,
+            }
+
+        # Process items (limit to avoid long requests)
+        data = await request.json() if request.headers.get("content-type") == "application/json" else {}
+        max_items = data.get("max_items", 5)
+
+        success_count = 0
+        failed_count = 0
+        processed_items = []
+
+        for item_path in pending[:max_items]:
+            try:
+                result = processor.process_item(item_path)
+                if result:
+                    success_count += 1
+                    processed_items.append({"file": item_path.name, "status": "success"})
+                else:
+                    failed_count += 1
+                    processed_items.append({"file": item_path.name, "status": "failed"})
+            except Exception as e:
+                failed_count += 1
+                processed_items.append({"file": item_path.name, "status": "error", "error": str(e)})
+
+        return {
+            "success": True,
+            "message": f"Processed {success_count + failed_count} items",
+            "processed": success_count + failed_count,
+            "success_count": success_count,
+            "failed_count": failed_count,
+            "remaining": pending_count - (success_count + failed_count),
+            "items": processed_items,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/plans/create")
+async def create_plan(request: Request) -> dict[str, Any]:
+    """Create a new plan."""
+    data = await request.json()
+
+    config = get_vault_config()
+    service = PlannerService(config)
+
+    try:
+        # Extract plan details
+        task = data.get("task", "")
+        objective = data.get("objective", "")
+        steps = data.get("steps", [])
+
+        if not task or not objective:
+            raise HTTPException(status_code=400, detail="task and objective are required")
+
+        # Create the plan
+        plan = service.create_plan(
+            task=task,
+            objective=objective,
+            steps=[{"description": s, "order": i + 1} for i, s in enumerate(steps)] if steps else None,
+        )
+
+        return {
+            "success": True,
+            "plan_id": plan.id,
+            "objective": plan.objective,
+            "steps_count": len(plan.steps),
+            "status": plan.status.value,
+        }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
