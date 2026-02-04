@@ -189,6 +189,96 @@ class ApprovalService:
         return self._list_approval_files(self._config.rejected)
 
     # ─────────────────────────────────────────────────────────────
+    # Direct Approve/Reject (for dashboard/API use)
+    # ─────────────────────────────────────────────────────────────
+
+    def approve_request(self, approval_id: str) -> ApprovalRequest:
+        """
+        Approve a pending request by ID.
+
+        Moves the request file from Pending_Approval to Approved folder.
+
+        Args:
+            approval_id: The approval request ID
+
+        Returns:
+            The approved request
+
+        Raises:
+            ApprovalError: If request not found or already processed
+        """
+        # Find the pending request
+        pending = self.get_pending_requests()
+        request = next((r for r in pending if r.id == approval_id), None)
+
+        if not request:
+            raise ApprovalError(f"Pending approval not found: {approval_id}")
+
+        if request.is_expired():
+            raise ApprovalExpiredError(f"Approval has expired: {approval_id}")
+
+        # Update status
+        approved_request = ApprovalRequest(
+            id=request.id,
+            category=request.category,
+            payload=request.payload,
+            created_at=request.created_at,
+            expires_at=request.expires_at,
+            status=ApprovalStatus.APPROVED,
+            summary=request.summary,
+        )
+
+        # Move file from Pending to Approved
+        src = self._config.pending_approval / request.get_filename()
+        if src.exists():
+            self._write_approval_file(approved_request, self._config.approved)
+            src.unlink()
+
+        return approved_request
+
+    def reject_request(self, approval_id: str, reason: str = "") -> ApprovalRequest:
+        """
+        Reject a pending request by ID.
+
+        Moves the request file from Pending_Approval to Rejected folder.
+
+        Args:
+            approval_id: The approval request ID
+            reason: Optional rejection reason
+
+        Returns:
+            The rejected request
+
+        Raises:
+            ApprovalError: If request not found or already processed
+        """
+        # Find the pending request
+        pending = self.get_pending_requests()
+        request = next((r for r in pending if r.id == approval_id), None)
+
+        if not request:
+            raise ApprovalError(f"Pending approval not found: {approval_id}")
+
+        # Update status
+        rejected_request = ApprovalRequest(
+            id=request.id,
+            category=request.category,
+            payload=request.payload,
+            created_at=request.created_at,
+            expires_at=request.expires_at,
+            status=ApprovalStatus.REJECTED,
+            summary=request.summary,
+        )
+
+        # Move file from Pending to Rejected
+        src = self._config.pending_approval / request.get_filename()
+        if src.exists():
+            self._write_approval_file(rejected_request, self._config.rejected)
+            src.unlink()
+
+        return rejected_request
+
+    # ─────────────────────────────────────────────────────────────
     # Expiration (FR-004, FR-004a)
     # ─────────────────────────────────────────────────────────────
 

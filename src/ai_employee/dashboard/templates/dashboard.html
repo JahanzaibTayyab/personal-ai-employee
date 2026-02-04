@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Employee | Mission Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="noise"></div>
+
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-icon">&#9678;</span>
+                <span class="logo-text">AI EMPLOYEE</span>
+            </div>
+            <span class="header-subtitle">MISSION CONTROL v1.0</span>
+        </div>
+        <div class="header-right">
+            <div class="status-indicator online">
+                <span class="pulse"></span>
+                <span>SYSTEM ONLINE</span>
+            </div>
+            <div class="timestamp" id="timestamp"></div>
+            <button class="refresh-btn" onclick="refreshAll()">
+                <span class="refresh-icon">&#8635;</span> REFRESH
+            </button>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <!-- Status Cards Row -->
+        <section class="status-grid">
+            <div class="status-card" data-type="inbox">
+                <div class="card-header">
+                    <span class="card-icon">&#9993;</span>
+                    <span class="card-title">INBOX</span>
+                </div>
+                <div class="card-value" id="inbox-count">--</div>
+                <div class="card-label">items waiting</div>
+            </div>
+
+            <div class="status-card" data-type="pending">
+                <div class="card-header">
+                    <span class="card-icon">&#9203;</span>
+                    <span class="card-title">NEEDS ACTION</span>
+                </div>
+                <div class="card-value" id="needs-action-count">--</div>
+                <div class="card-label">to process</div>
+            </div>
+
+            <div class="status-card" data-type="done">
+                <div class="card-header">
+                    <span class="card-icon">&#10003;</span>
+                    <span class="card-title">COMPLETED</span>
+                </div>
+                <div class="card-value" id="done-count">--</div>
+                <div class="card-label">items done</div>
+            </div>
+
+            <div class="status-card" data-type="quarantine">
+                <div class="card-header">
+                    <span class="card-icon">&#9888;</span>
+                    <span class="card-title">QUARANTINE</span>
+                </div>
+                <div class="card-value" id="quarantine-count">--</div>
+                <div class="card-label">flagged</div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <section class="content-grid">
+            <!-- Approvals Panel -->
+            <div class="panel approvals-panel">
+                <div class="panel-header">
+                    <h2>&#9888; PENDING APPROVALS</h2>
+                    <span class="badge" id="approval-badge">0</span>
+                </div>
+                <div class="panel-content" id="approvals-list">
+                    <div class="loading">Loading approvals...</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Panel -->
+            <div class="panel actions-panel">
+                <div class="panel-header">
+                    <h2>&#9889; QUICK ACTIONS</h2>
+                </div>
+                <div class="panel-content">
+                    <div class="action-grid">
+                        <button class="action-btn" onclick="openEmailModal()">
+                            <span class="action-icon">&#9993;</span>
+                            <span class="action-label">SEND EMAIL</span>
+                        </button>
+                        <button class="action-btn" onclick="openLinkedInModal()">
+                            <span class="action-icon">&#128101;</span>
+                            <span class="action-label">POST LINKEDIN</span>
+                        </button>
+                        <button class="action-btn" onclick="openPlanModal()">
+                            <span class="action-icon">&#128196;</span>
+                            <span class="action-label">CREATE PLAN</span>
+                        </button>
+                        <button class="action-btn" onclick="runProcessInbox()">
+                            <span class="action-icon">&#9881;</span>
+                            <span class="action-label">PROCESS INBOX</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scheduled Tasks Panel -->
+            <div class="panel schedules-panel">
+                <div class="panel-header">
+                    <h2>&#128197; SCHEDULED TASKS</h2>
+                    <span class="badge" id="schedule-badge">0</span>
+                </div>
+                <div class="panel-content" id="schedules-list">
+                    <div class="loading">Loading schedules...</div>
+                </div>
+            </div>
+
+            <!-- Active Plans Panel -->
+            <div class="panel plans-panel">
+                <div class="panel-header">
+                    <h2>&#128200; ACTIVE PLANS</h2>
+                    <span class="badge" id="plan-badge">0</span>
+                </div>
+                <div class="panel-content" id="plans-list">
+                    <div class="loading">Loading plans...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Watchers Status Bar -->
+        <section class="watchers-bar">
+            <div class="watcher-status">
+                <span class="watcher-label">FILE WATCHER</span>
+                <span class="watcher-indicator" id="file-watcher">STOPPED</span>
+            </div>
+            <div class="watcher-status">
+                <span class="watcher-label">GMAIL WATCHER</span>
+                <span class="watcher-indicator" id="gmail-watcher">STOPPED</span>
+            </div>
+            <div class="watcher-status">
+                <span class="watcher-label">WHATSAPP</span>
+                <span class="watcher-indicator" id="whatsapp-watcher">STOPPED</span>
+            </div>
+            <div class="watcher-status">
+                <span class="watcher-label">APPROVAL WATCHER</span>
+                <span class="watcher-indicator" id="approval-watcher">STOPPED</span>
+            </div>
+        </section>
+    </main>
+
+    <!-- Email Modal -->
+    <div class="modal" id="email-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>&#9993; COMPOSE EMAIL</h3>
+                <button class="close-btn" onclick="closeModal('email-modal')">&times;</button>
+            </div>
+            <form id="email-form" onsubmit="sendEmail(event)">
+                <div class="form-group">
+                    <label>TO:</label>
+                    <input type="email" id="email-to" required placeholder="recipient@example.com">
+                </div>
+                <div class="form-group">
+                    <label>CC:</label>
+                    <input type="text" id="email-cc" placeholder="cc@example.com (optional)">
+                </div>
+                <div class="form-group">
+                    <label>SUBJECT:</label>
+                    <input type="text" id="email-subject" required placeholder="Email subject">
+                </div>
+                <div class="form-group">
+                    <label>BODY:</label>
+                    <textarea id="email-body" rows="6" required placeholder="Email content..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('email-modal')">CANCEL</button>
+                    <button type="submit" class="btn-submit">QUEUE FOR APPROVAL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- LinkedIn Modal -->
+    <div class="modal" id="linkedin-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>&#128101; LINKEDIN POST</h3>
+                <button class="close-btn" onclick="closeModal('linkedin-modal')">&times;</button>
+            </div>
+            <form id="linkedin-form" onsubmit="postLinkedIn(event)">
+                <div class="form-group">
+                    <label>POST CONTENT:</label>
+                    <textarea id="linkedin-content" rows="8" required placeholder="Write your LinkedIn post..."></textarea>
+                    <div class="char-count"><span id="linkedin-chars">0</span>/3000</div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('linkedin-modal')">CANCEL</button>
+                    <button type="submit" class="btn-submit">QUEUE FOR APPROVAL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Plan Modal -->
+    <div class="modal" id="plan-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>&#128196; CREATE PLAN</h3>
+                <button class="close-btn" onclick="closeModal('plan-modal')">&times;</button>
+            </div>
+            <form id="plan-form" onsubmit="createPlan(event)">
+                <div class="form-group">
+                    <label>OBJECTIVE:</label>
+                    <input type="text" id="plan-objective" required placeholder="What do you want to accomplish?">
+                </div>
+                <div class="form-group">
+                    <label>DESCRIPTION:</label>
+                    <textarea id="plan-description" rows="4" placeholder="Additional context (optional)"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('plan-modal')">CANCEL</button>
+                    <button type="submit" class="btn-submit">CREATE PLAN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

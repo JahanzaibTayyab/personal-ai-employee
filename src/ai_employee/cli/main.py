@@ -370,6 +370,27 @@ def cmd_scheduler(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_web_dashboard(args: argparse.Namespace) -> int:
+    """Run the web dashboard server.
+
+    Args:
+        args: Parsed command line arguments
+
+    Returns:
+        Exit code (0 for success)
+    """
+    try:
+        from ai_employee.dashboard import run_server
+    except ImportError:
+        print("Dashboard dependencies not installed.")
+        print("Run: uv add fastapi uvicorn jinja2 python-multipart")
+        return 1
+
+    print("Starting AI Employee Web Dashboard")
+    run_server(host=args.host, port=args.port)
+    return 0
+
+
 def cmd_init(args: argparse.Namespace) -> int:
     """Initialize the vault structure command.
 
@@ -581,6 +602,25 @@ def create_parser() -> argparse.ArgumentParser:
         help="Path to create the Obsidian vault (default: ~/AI_Employee_Vault)",
     )
     init_parser.set_defaults(func=cmd_init)
+
+    # Web dashboard command
+    web_parser = subparsers.add_parser(
+        "web",
+        help="Start the web dashboard",
+    )
+    web_parser.add_argument(
+        "--host",
+        type=str,
+        default="127.0.0.1",
+        help="Host to bind to (default: 127.0.0.1)",
+    )
+    web_parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to bind to (default: 8000)",
+    )
+    web_parser.set_defaults(func=cmd_web_dashboard)
 
     # Scheduler command
     scheduler_parser = subparsers.add_parser(

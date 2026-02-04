@@ -29,6 +29,12 @@ linkedin = [
 silver = [
     "ai-employee[gmail,whatsapp,linkedin]",
 ]
+dashboard = [
+    "fastapi>=0.128.1",
+    "jinja2>=3.1.6",
+    "python-multipart>=0.0.22",
+    "uvicorn>=0.40.0",
+]
 
 [project.scripts]
 ai-employee = "ai_employee.cli.main:main"
@@ -55,6 +61,7 @@ python_functions = ["test_*"]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "mypy>=1.14.0",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
