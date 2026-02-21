@@ -269,9 +269,11 @@ function showApprovalDetail(approval) {
     if (approval.payload) {
         var p = approval.payload;
         if (approval.category === 'email') {
+            var toVal = (Array.isArray(p.to) && p.to.length > 0) ? p.to.join(', ') : (p.to || 'N/A');
+            var ccVal = (Array.isArray(p.cc) && p.cc.length > 0) ? p.cc.join(', ') : (p.cc || 'None');
             body += '<div class="detail-section"><div class="detail-label">Email Details</div><div class="detail-grid">'
-                + '<div class="detail-pair"><span class="k">To</span><span class="v">' + escapeHtml((p.to || []).join(', ')) + '</span></div>'
-                + '<div class="detail-pair"><span class="k">CC</span><span class="v">' + escapeHtml((p.cc || []).join(', ') || 'None') + '</span></div>'
+                + '<div class="detail-pair"><span class="k">To</span><span class="v">' + escapeHtml(toVal) + '</span></div>'
+                + '<div class="detail-pair"><span class="k">CC</span><span class="v">' + escapeHtml(ccVal) + '</span></div>'
                 + '<div class="detail-pair"><span class="k">Subject</span><span class="v">' + escapeHtml(p.subject || '') + '</span></div>'
                 + '</div></div>'
                 + '<div class="detail-section"><div class="detail-label">Body</div><div class="detail-value"><pre>' + escapeHtml(p.body || '') + '</pre></div></div>';
@@ -462,7 +464,10 @@ var _approvalsCache = [];
 function getApprovalSummary(approval) {
     if (approval.payload) {
         if (approval.category === 'email') {
-            return 'Email to ' + ((approval.payload.to || []).join(', ') || 'N/A') + ': ' + (approval.payload.subject || 'No subject');
+            var to = Array.isArray(approval.payload.to)
+                ? (approval.payload.to.join(', ') || 'N/A')
+                : (approval.payload.to || 'N/A');
+            return 'Email to ' + to + ': ' + (approval.payload.subject || 'No subject');
         }
         if (approval.category === 'linkedin' || approval.category === 'social_post') {
             var c = approval.payload.content || '';
