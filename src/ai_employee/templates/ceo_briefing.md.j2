@@ -1,0 +1,87 @@
+# CEO Briefing - {{ briefing.period_start.isoformat() }} to {{ briefing.period_end.isoformat() }}
+
+*Generated: {{ briefing.generated_at.strftime('%Y-%m-%d %H:%M') }}*
+
+## Executive Summary
+
+{{ briefing.executive_summary }}
+
+## Revenue
+
+- **This Week:** ${{ "{:,.2f}".format(briefing.revenue_this_week) }}
+- **Month-to-Date:** ${{ "{:,.2f}".format(briefing.revenue_mtd) }}
+{% if briefing.monthly_goal %}
+- **Monthly Goal:** ${{ "{:,.2f}".format(briefing.monthly_goal) }} ({{ "{:.1f}".format(briefing.revenue_progress()) }}% achieved)
+{% endif %}
+- **Trend:** {{ briefing.revenue_trend }}
+
+{% if briefing.completed_tasks %}
+## Completed Tasks
+
+| Task | Category | Completed |
+|------|----------|-----------|
+{% for task in briefing.completed_tasks %}
+| {{ task.name }} | {{ task.category }} | {{ task.completed_at.strftime('%Y-%m-%d %H:%M') }} |
+{% endfor %}
+
+{% endif %}
+{% if briefing.bottlenecks %}
+## Bottlenecks
+
+{% for bn in briefing.bottlenecks %}
+- **[{{ bn.severity | upper }}]** {{ bn.description }} *({{ bn.affected_area }})*
+  - Expected: {{ bn.expected_duration_hours }}h | Actual: {{ bn.actual_duration_hours }}h | Delay ratio: {{ "{:.1f}".format(bn.delay_ratio()) }}x
+{% endfor %}
+
+{% endif %}
+{% if briefing.cost_suggestions %}
+## Cost Optimization Suggestions
+
+{% for cs in briefing.cost_suggestions %}
+- {{ cs.description }} *(est. savings: ${{ "{:,.2f}".format(cs.estimated_savings) }}, confidence: {{ cs.confidence }})*
+{% endfor %}
+
+{% endif %}
+{% if briefing.upcoming_deadlines %}
+## Upcoming Deadlines
+
+| Deadline | Due Date | Priority | Status | Days Left |
+|----------|----------|----------|--------|-----------|
+{% for dl in briefing.upcoming_deadlines %}
+| {{ dl.description }} | {{ dl.due_date.isoformat() }} | {{ dl.priority }} | {{ dl.status }} | {{ dl.days_remaining() }} |
+{% endfor %}
+
+{% endif %}
+{% if briefing.social_media_summary %}
+## Social Media
+
+- **Posts Published:** {{ briefing.social_media_summary.posts_published }}
+- **Total Impressions:** {{ "{:,}".format(briefing.social_media_summary.total_impressions) }}
+- **Engagement Rate:** {{ "{:.1f}".format(briefing.social_media_summary.engagement_rate()) }}%
+{% if briefing.social_media_summary.top_post_topic %}
+- **Top Post Topic:** {{ briefing.social_media_summary.top_post_topic }}
+{% endif %}
+{% if briefing.social_media_summary.leads_detected > 0 %}
+- **Leads Detected:** {{ briefing.social_media_summary.leads_detected }}
+{% endif %}
+
+{% endif %}
+{% if briefing.audit_summary %}
+## Audit Summary
+
+- **Transactions Reviewed:** {{ briefing.audit_summary.total_transactions }}
+- **Flagged Transactions:** {{ briefing.audit_summary.flagged_transactions }}
+- **Data Quality Score:** {{ "{:.0%}".format(briefing.audit_summary.data_quality_score) }}
+{% if briefing.audit_summary.unused_subscriptions %}
+- **Unused Subscriptions:** {{ briefing.audit_summary.unused_subscriptions | join(', ') }}
+{% endif %}
+{% if briefing.audit_summary.compliance_issues %}
+- **Compliance Issues:**
+{% for issue in briefing.audit_summary.compliance_issues %}
+  - {{ issue }}
+{% endfor %}
+{% endif %}
+
+{% endif %}
+---
+*Report ID: {{ briefing.id }}*

@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+from datetime import datetime
 from pathlib import Path
 
 
@@ -459,6 +460,44 @@ Owner: [Your Name]
     if not config.handbook.exists():
         config.handbook.write_text(initial_handbook)
 
+    # Create initial Business_Goals.md (Gold tier)
+    initial_business_goals = """# Business Goals
+
+---
+last_updated: {date}
+review_frequency: weekly
+---
+
+## Q1 Objectives
+
+### Revenue Target
+- Monthly goal: $10,000
+- Current MTD: $0
+
+### Key Metrics to Track
+
+| Metric | Target | Alert Threshold |
+|--------|--------|-----------------|
+| Client response time | < 24 hours | > 48 hours |
+| Invoice payment rate | > 90% | < 80% |
+| Software costs | < $500/month | > $600/month |
+
+### Active Projects
+1. Example Project - Due TBD - Budget $0
+
+### Subscription Audit Rules
+Flag for review if:
+- No login in 30 days
+- Cost increased > 20%
+- Duplicate functionality with another tool
+
+---
+*Configure these goals for your business*
+""".format(date=datetime.now().strftime("%Y-%m-%d"))
+
+    if not config.business_goals.exists():
+        config.business_goals.write_text(initial_business_goals)
+
     print(f"Vault initialized at: {vault_path}")
     print("Created folders:")
     print("  - Inbox/")
@@ -471,6 +510,7 @@ Owner: [Your Name]
     print("Created files:")
     print("  - Dashboard.md")
     print("  - Company_Handbook.md")
+    print("  - Business_Goals.md")
     return 0
 
 
