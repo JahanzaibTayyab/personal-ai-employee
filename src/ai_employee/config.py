@@ -111,6 +111,82 @@ class VaultConfig:
         """Path to Schedules folder for schedule configurations."""
         return self.root / "Schedules"
 
+    # Gold Tier: Ralph Wiggum
+    @property
+    def active_tasks(self) -> Path:
+        """Path to Active_Tasks folder for Ralph Wiggum task states."""
+        return self.root / "Active_Tasks"
+
+    # Gold Tier: Accounting (Odoo)
+    @property
+    def accounting(self) -> Path:
+        """Path to Accounting folder for financial data."""
+        return self.root / "Accounting"
+
+    @property
+    def accounting_invoices(self) -> Path:
+        """Path to Accounting/invoices folder."""
+        return self.root / "Accounting" / "invoices"
+
+    @property
+    def accounting_payments(self) -> Path:
+        """Path to Accounting/payments folder."""
+        return self.root / "Accounting" / "payments"
+
+    @property
+    def accounting_transactions(self) -> Path:
+        """Path to Accounting/transactions folder."""
+        return self.root / "Accounting" / "transactions"
+
+    # Gold Tier: Social Media (Meta/Twitter)
+    @property
+    def social_meta(self) -> Path:
+        """Path to Social/Meta folder for Facebook/Instagram."""
+        return self.root / "Social" / "Meta"
+
+    @property
+    def social_meta_posts(self) -> Path:
+        """Path to Social/Meta/posts folder."""
+        return self.root / "Social" / "Meta" / "posts"
+
+    @property
+    def social_twitter(self) -> Path:
+        """Path to Social/Twitter folder."""
+        return self.root / "Social" / "Twitter"
+
+    @property
+    def social_twitter_tweets(self) -> Path:
+        """Path to Social/Twitter/tweets folder."""
+        return self.root / "Social" / "Twitter" / "tweets"
+
+    # Gold Tier: Needs_Action subfolders
+    @property
+    def needs_action_facebook(self) -> Path:
+        """Path to Needs_Action/Facebook folder."""
+        return self.root / "Needs_Action" / "Facebook"
+
+    @property
+    def needs_action_twitter(self) -> Path:
+        """Path to Needs_Action/Twitter folder."""
+        return self.root / "Needs_Action" / "Twitter"
+
+    @property
+    def needs_action_odoo(self) -> Path:
+        """Path to Needs_Action/Odoo folder."""
+        return self.root / "Needs_Action" / "Odoo"
+
+    # Gold Tier: Archive
+    @property
+    def archive(self) -> Path:
+        """Path to Archive folder for compressed old logs."""
+        return self.root / "Archive"
+
+    # Gold Tier: Business Goals
+    @property
+    def business_goals(self) -> Path:
+        """Path to Business_Goals.md."""
+        return self.root / "Business_Goals.md"
+
     def ensure_structure(self) -> None:
         """Create all required vault folders if they don't exist."""
         folders = [
@@ -133,6 +209,20 @@ class VaultConfig:
             self.social_linkedin_posts,
             self.briefings,
             self.schedules,
+            # Gold tier folders
+            self.active_tasks,
+            self.accounting,
+            self.accounting_invoices,
+            self.accounting_payments,
+            self.accounting_transactions,
+            self.social_meta,
+            self.social_meta_posts,
+            self.social_twitter,
+            self.social_twitter_tweets,
+            self.needs_action_facebook,
+            self.needs_action_twitter,
+            self.needs_action_odoo,
+            self.archive,
         ]
         for folder in folders:
             folder.mkdir(parents=True, exist_ok=True)
