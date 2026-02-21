@@ -8,7 +8,7 @@ A **Digital FTE (Full-Time Equivalent)** that proactively manages your personal 
 
 ## Architecture
 
-```
+```text
 External Sources            Perception Layer              Obsidian Vault (Local)
 ┌─────────────┐      ┌──────────────────────┐     ┌──────────────────────────┐
 │ Gmail       │─────>│ Gmail Watcher        │────>│ /Needs_Action/Email/     │
@@ -220,6 +220,7 @@ uv run ai-employee scheduler --vault ~/AI_Employee_Vault remove --id schedule_da
 **Task Types:** `briefing`, `audit`, `update_dashboard`, `check_approvals`, `custom`
 
 **Cron Schedule Examples:**
+
 | Schedule | Meaning |
 |----------|---------|
 | `0 8 * * *` | Every day at 8:00 AM |
@@ -644,7 +645,7 @@ Gmail Watcher detects an important unread email:
 
 ## Vault Structure
 
-```
+```text
 AI_Employee_Vault/
 ├── Dashboard.md                    # Real-time status (view in Obsidian)
 ├── Company_Handbook.md             # Processing rules ("Rules of Engagement")
@@ -784,7 +785,7 @@ For invoice management and accounting integration:
 
 ## Project Structure
 
-```
+```text
 src/ai_employee/
 ├── cli/                    # Command line interface
 │   └── main.py             # All CLI commands (watch, web, scheduler, etc.)

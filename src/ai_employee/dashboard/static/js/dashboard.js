@@ -269,8 +269,8 @@ function showApprovalDetail(approval) {
     if (approval.payload) {
         var p = approval.payload;
         if (approval.category === 'email') {
-            var toVal = Array.isArray(p.to) ? p.to.join(', ') : (p.to || 'N/A');
-            var ccVal = Array.isArray(p.cc) ? p.cc.join(', ') : (p.cc || 'None');
+            var toVal = (Array.isArray(p.to) && p.to.length > 0) ? p.to.join(', ') : (p.to || 'N/A');
+            var ccVal = (Array.isArray(p.cc) && p.cc.length > 0) ? p.cc.join(', ') : (p.cc || 'None');
             body += '<div class="detail-section"><div class="detail-label">Email Details</div><div class="detail-grid">'
                 + '<div class="detail-pair"><span class="k">To</span><span class="v">' + escapeHtml(toVal) + '</span></div>'
                 + '<div class="detail-pair"><span class="k">CC</span><span class="v">' + escapeHtml(ccVal) + '</span></div>'
@@ -464,8 +464,9 @@ var _approvalsCache = [];
 function getApprovalSummary(approval) {
     if (approval.payload) {
         if (approval.category === 'email') {
-            var to = approval.payload.to || 'N/A';
-            if (Array.isArray(to)) to = to.join(', ');
+            var to = Array.isArray(approval.payload.to)
+                ? (approval.payload.to.join(', ') || 'N/A')
+                : (approval.payload.to || 'N/A');
             return 'Email to ' + to + ': ' + (approval.payload.subject || 'No subject');
         }
         if (approval.category === 'linkedin' || approval.category === 'social_post') {

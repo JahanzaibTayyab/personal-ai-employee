@@ -27,7 +27,7 @@ module.exports = {
     {
       name: 'file-watcher',
       script: 'uv',
-      args: `run ai-employee watch --vault ${VAULT} --interval 60`,
+      args: ['run', 'ai-employee', 'watch', '--vault', VAULT, '--interval', '60'],
       cwd: CWD,
       autorestart: true,
       restart_delay: 5000,
@@ -41,7 +41,7 @@ module.exports = {
     {
       name: 'gmail-watcher',
       script: 'uv',
-      args: `run ai-employee watch-gmail --vault ${VAULT} --credentials ${GMAIL_CREDS} --interval 120`,
+      args: ['run', 'ai-employee', 'watch-gmail', '--vault', VAULT, '--credentials', GMAIL_CREDS, '--interval', '120'],
       cwd: CWD,
       autorestart: true,
       restart_delay: 10000,
@@ -57,7 +57,7 @@ module.exports = {
     {
       name: 'approval-watcher',
       script: 'uv',
-      args: `run ai-employee watch-approvals --vault ${VAULT} --interval 60`,
+      args: ['run', 'ai-employee', 'watch-approvals', '--vault', VAULT, '--interval', '60'],
       cwd: CWD,
       autorestart: true,
       restart_delay: 5000,
@@ -71,7 +71,7 @@ module.exports = {
     {
       name: 'whatsapp-watcher',
       script: 'uv',
-      args: `run ai-employee watch-whatsapp --vault ${VAULT}`,
+      args: ['run', 'ai-employee', 'watch-whatsapp', '--vault', VAULT],
       cwd: CWD,
       autorestart: true,
       restart_delay: 15000,
@@ -85,7 +85,7 @@ module.exports = {
     {
       name: 'web-dashboard',
       script: 'uv',
-      args: `run ai-employee web --host ${WEB_HOST} --port ${WEB_PORT}`,
+      args: ['run', 'ai-employee', 'web', '--host', WEB_HOST, '--port', WEB_PORT],
       cwd: CWD,
       autorestart: true,
       restart_delay: 3000,

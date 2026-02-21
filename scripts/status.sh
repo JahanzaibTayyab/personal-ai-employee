@@ -32,12 +32,11 @@ try:
             p = found[name]
             status = p['pm2_env']['status']
             restarts = p['pm2_env']['restart_time']
-            uptime = p['pm2_env'].get('pm_uptime', 0)
             color = '\033[0;32m' if status == 'online' else '\033[0;31m'
             print(f'  {color}{status:8s}\033[0m  {name:20s}  restarts: {restarts}')
         else:
             print(f'  \033[0;33mnot set \033[0m  {name:20s}')
-except:
+except Exception:
     print('  No AI Employee processes found in PM2')
 " 2>/dev/null || echo "  PM2 is installed but no processes found"
 else
@@ -70,7 +69,7 @@ if [ -d "$VAULT" ]; then
     echo "  Active Tasks:     $tasks"
 else
     echo -e "  ${RED}Vault not found at $VAULT${NC}"
-    echo "  Initialize: uv run ai-employee init --vault $VAULT"
+    echo "  Initialize: uv run ai-employee init --vault \"$VAULT\""
 fi
 
 echo ""
@@ -78,7 +77,7 @@ echo ""
 # Web Dashboard
 echo -e "${YELLOW}Web Dashboard:${NC}"
 PORT="${AI_WEB_PORT:-8000}"
-if curl -s "http://127.0.0.1:$PORT/api/health" > /dev/null 2>&1; then
+if curl -s --max-time 5 "http://127.0.0.1:$PORT/api/health" > /dev/null 2>&1; then
     echo -e "  ${GREEN}Running${NC} at http://127.0.0.1:$PORT"
 else
     echo -e "  ${RED}Not running${NC} on port $PORT"

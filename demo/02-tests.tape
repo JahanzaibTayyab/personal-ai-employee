@@ -19,7 +19,7 @@ Sleep 1s
 
 Type "uv run pytest --tb=short -q"
 Enter
-Sleep 30s
+Sleep 60s
 
 Type ""
 Enter
@@ -29,6 +29,6 @@ Sleep 500ms
 
 Type "uv run pytest --cov=ai_employee --cov-report=term-missing -q 2>&1 | tail -30"
 Enter
-Sleep 30s
+Sleep 90s
 
 Sleep 2s

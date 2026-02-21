@@ -61,7 +61,12 @@ TIER="${1:-all}"
 
 case "$TIER" in
     --only)
-        TIER="${2:-all}"
+        if [ -z "$2" ]; then
+            echo -e "${RED}Error: --only requires a tier argument (bronze|silver|gold|dashboard)${NC}"
+            echo "Usage: $0 [--only bronze|silver|gold|dashboard]"
+            exit 1
+        fi
+        TIER="$2"
         ;;
 esac
 
@@ -98,7 +103,7 @@ echo ""
 pm2 status
 
 echo ""
-echo -e "${GREEN}All services started.${NC}"
+echo -e "${GREEN}${TIER^} services started.${NC}"
 echo ""
 echo -e "  Dashboard: ${BLUE}http://127.0.0.1:${AI_WEB_PORT:-8000}${NC}"
 echo ""

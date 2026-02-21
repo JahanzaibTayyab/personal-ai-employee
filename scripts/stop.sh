@@ -24,7 +24,7 @@ fi
 
 if [ -n "$1" ]; then
     echo "Stopping $1..."
-    pm2 stop "$1"
+    pm2 stop "$1" 2>/dev/null || true
 else
     echo "Stopping all AI Employee services..."
     pm2 stop file-watcher gmail-watcher approval-watcher whatsapp-watcher web-dashboard 2>/dev/null || true

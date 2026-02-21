@@ -26,7 +26,7 @@ import time
 from pathlib import Path
 
 try:
-    from playwright.sync_api import sync_playwright
+    from playwright.sync_api import Page, sync_playwright
 except ImportError:
     print("Playwright not installed. Install with:")
     print("  pip install playwright && playwright install chromium")
@@ -39,7 +39,7 @@ PAUSE_LONG = 4.0
 BASE_URL = "http://127.0.0.1:8000"
 
 
-def take_screenshot(page, screenshots_dir: Path | None, name: str) -> None:
+def take_screenshot(page: Page, screenshots_dir: Path | None, name: str) -> None:
     if screenshots_dir is not None:
         path = screenshots_dir / f"{name}.png"
         page.screenshot(path=str(path), full_page=False)
@@ -86,38 +86,38 @@ def run_walkthrough(screenshots_dir: Path | None = None) -> None:
 
         # ── Step 3: Click an approval item ───────────────────────
         log_step(3, "Click approval item to view details")
-        approval_items = page.query_selector_all("#approvals-list .list-item")
-        if approval_items:
-            approval_items[0].click()
+        approval_locator = page.locator("#approvals-list .list-item")
+        if approval_locator.count() > 0:
+            approval_locator.first.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "04-approval-detail")
 
-            close_btn = page.query_selector("#detail-modal .modal-close")
-            if close_btn:
-                close_btn.click()
+            close_locator = page.locator("#detail-modal .modal-close")
+            if close_locator.count() > 0:
+                close_locator.click()
             time.sleep(PAUSE_SHORT)
         else:
             print("  (No approval items found)")
 
         # ── Step 4: Click a plan item ────────────────────────────
         log_step(4, "Click plan to view steps and progress")
-        plan_items = page.query_selector_all("#plans-list .list-item")
-        if plan_items:
-            plan_items[0].click()
+        plan_locator = page.locator("#plans-list .list-item")
+        if plan_locator.count() > 0:
+            plan_locator.first.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "05-plan-detail")
 
-            close_btn = page.query_selector("#detail-modal .modal-close")
-            if close_btn:
-                close_btn.click()
+            close_locator = page.locator("#detail-modal .modal-close")
+            if close_locator.count() > 0:
+                close_locator.click()
             time.sleep(PAUSE_SHORT)
         else:
             print("  (No plan items found)")
 
         # ── Step 5: Open Send Email quick action ─────────────────
         log_step(5, "Open 'Send Email' quick action and fill form")
-        email_btn = page.query_selector("button.action-btn:has-text('Send Email')")
-        if email_btn:
+        email_btn = page.locator("button.action-btn", has_text="Send Email")
+        if email_btn.count() > 0:
             email_btn.click()
             time.sleep(PAUSE_MEDIUM)
 
@@ -134,124 +134,122 @@ def run_walkthrough(screenshots_dir: Path | None = None) -> None:
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "06-email-form")
 
-            cancel_btn = page.query_selector("#email-modal .btn--secondary")
-            if cancel_btn:
-                cancel_btn.click()
+            cancel_locator = page.locator("#email-modal .btn--secondary")
+            if cancel_locator.count() > 0:
+                cancel_locator.click()
             time.sleep(PAUSE_SHORT)
         else:
             print("  (Send Email button not found)")
 
         # ── Step 6: Switch to Social Media tab ───────────────────
         log_step(6, "Switch to Social Media tab")
-        social_tab = page.query_selector("button.tab-trigger[data-tab='social']")
-        if social_tab:
+        social_tab = page.locator("button.tab-trigger[data-tab='social']")
+        if social_tab.count() > 0:
             social_tab.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "07-social-tab")
 
         # ── Step 7: Click a Meta post ────────────────────────────
         log_step(7, "Click Meta post to view details")
-        meta_items = page.query_selector_all("#meta-list .list-item")
-        if meta_items:
-            meta_items[0].click()
+        meta_locator = page.locator("#meta-list .list-item")
+        if meta_locator.count() > 0:
+            meta_locator.first.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "08-meta-detail")
 
-            close_btn = page.query_selector("#detail-modal .modal-close")
-            if close_btn:
-                close_btn.click()
+            close_locator = page.locator("#detail-modal .modal-close")
+            if close_locator.count() > 0:
+                close_locator.click()
             time.sleep(PAUSE_SHORT)
         else:
             print("  (No Meta posts found)")
 
         # ── Step 8: Click a tweet ────────────────────────────────
         log_step(8, "Click tweet to view details")
-        tweet_items = page.query_selector_all("#twitter-list .list-item")
-        if tweet_items:
-            tweet_items[0].click()
+        tweet_locator = page.locator("#twitter-list .list-item")
+        if tweet_locator.count() > 0:
+            tweet_locator.first.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "09-tweet-detail")
 
-            close_btn = page.query_selector("#detail-modal .modal-close")
-            if close_btn:
-                close_btn.click()
+            close_locator = page.locator("#detail-modal .modal-close")
+            if close_locator.count() > 0:
+                close_locator.click()
             time.sleep(PAUSE_SHORT)
         else:
             print("  (No tweets found)")
 
         # ── Step 9: Switch to Operations tab ─────────────────────
         log_step(9, "Switch to Operations tab")
-        ops_tab = page.query_selector("button.tab-trigger[data-tab='operations']")
-        if ops_tab:
+        ops_tab = page.locator("button.tab-trigger[data-tab='operations']")
+        if ops_tab.count() > 0:
             ops_tab.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "10-operations-tab")
 
         # ── Step 10: Click a Ralph Wiggum task ───────────────────
         log_step(10, "Click Ralph Wiggum task to view details")
-        task_items = page.query_selector_all("#tasks-list .list-item")
-        if task_items:
-            task_items[0].click()
+        task_locator = page.locator("#tasks-list .list-item")
+        if task_locator.count() > 0:
+            task_locator.first.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "11-ralph-task-detail")
 
-            close_btn = page.query_selector("#detail-modal .modal-close")
-            if close_btn:
-                close_btn.click()
+            close_locator = page.locator("#detail-modal .modal-close")
+            if close_locator.count() > 0:
+                close_locator.click()
             time.sleep(PAUSE_SHORT)
         else:
             print("  (No Ralph Wiggum tasks found)")
 
         # ── Step 11: Click a CEO briefing ────────────────────────
         log_step(11, "Click CEO briefing to view full content")
-        briefing_items = page.query_selector_all("#briefings-list .list-item")
-        if briefing_items:
-            briefing_items[0].click()
+        briefing_locator = page.locator("#briefings-list .list-item")
+        if briefing_locator.count() > 0:
+            briefing_locator.first.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "12-briefing-detail")
 
             # Scroll within modal to show full briefing
-            modal_body = page.query_selector("#detail-modal-body")
-            if modal_body:
+            modal_body = page.locator("#detail-modal-body")
+            if modal_body.count() > 0:
                 page.evaluate(
                     "document.querySelector('#detail-modal-body').scrollTop = 300"
                 )
                 time.sleep(PAUSE_MEDIUM)
                 take_screenshot(page, screenshots_dir, "13-briefing-scrolled")
 
-            close_btn = page.query_selector("#detail-modal .modal-close")
-            if close_btn:
-                close_btn.click()
+            close_locator = page.locator("#detail-modal .modal-close")
+            if close_locator.count() > 0:
+                close_locator.click()
             time.sleep(PAUSE_SHORT)
         else:
             print("  (No briefings found)")
 
         # ── Step 12: Click an invoice ────────────────────────────
         log_step(12, "Click invoice to view details")
-        invoice_items = page.query_selector_all("#invoices-list .list-item")
-        if invoice_items:
-            invoice_items[0].click()
+        invoice_locator = page.locator("#invoices-list .list-item")
+        if invoice_locator.count() > 0:
+            invoice_locator.first.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "14-invoice-detail")
 
-            close_btn = page.query_selector("#detail-modal .modal-close")
-            if close_btn:
-                close_btn.click()
+            close_locator = page.locator("#detail-modal .modal-close")
+            if close_locator.count() > 0:
+                close_locator.click()
             time.sleep(PAUSE_SHORT)
         else:
             print("  (No invoices found)")
 
         # ── Step 13: Cross-domain search ─────────────────────────
         log_step(13, "Cross-domain search: 'Acme'")
-        search_input = page.query_selector("#search-query")
-        if search_input:
+        search_input = page.locator("#search-query")
+        if search_input.count() > 0:
             search_input.fill("Acme")
             time.sleep(0.5)
 
-            search_btn = page.query_selector(
-                "button.btn--primary.btn--sm:has-text('Search')"
-            )
-            if search_btn:
+            search_btn = page.locator("button.btn--primary.btn--sm", has_text="Search")
+            if search_btn.count() > 0:
                 search_btn.click()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "15-search-results")
@@ -263,9 +261,9 @@ def run_walkthrough(screenshots_dir: Path | None = None) -> None:
         page.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})")
         time.sleep(PAUSE_SHORT)
 
-        audit_list = page.query_selector("#audit-list")
-        if audit_list:
-            audit_list.scroll_into_view_if_needed()
+        audit_locator = page.locator("#audit-list")
+        if audit_locator.count() > 0:
+            audit_locator.scroll_into_view_if_needed()
             time.sleep(PAUSE_LONG)
             take_screenshot(page, screenshots_dir, "16-audit-log")
         else:
@@ -273,8 +271,8 @@ def run_walkthrough(screenshots_dir: Path | None = None) -> None:
 
         # ── Step 15: Return to Overview ──────────────────────────
         log_step(15, "Return to Overview tab — final view")
-        overview_tab = page.query_selector("button.tab-trigger[data-tab='overview']")
-        if overview_tab:
+        overview_tab = page.locator("button.tab-trigger[data-tab='overview']")
+        if overview_tab.count() > 0:
             overview_tab.click()
             time.sleep(PAUSE_SHORT)
 

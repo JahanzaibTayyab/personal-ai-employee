@@ -70,7 +70,7 @@ start_server() {
     echo "  Web server starting (PID $SERVER_PID)..."
 
     # Wait for server to be ready
-    for i in $(seq 1 30); do
+    for _ in $(seq 30); do
         if curl -s "http://127.0.0.1:$PORT/api/health" > /dev/null 2>&1; then
             echo -e "  ${GREEN}Server ready at http://127.0.0.1:$PORT${NC}"
             return 0
@@ -111,7 +111,7 @@ record_vhs() {
 run_browser() {
     header "Phase 4: Running Playwright browser walkthrough"
 
-    if ! python -c "import playwright" 2>/dev/null; then
+    if ! uv run python -c "import playwright" 2>/dev/null; then
         echo -e "${YELLOW}Playwright not installed. Install with:${NC}"
         echo "  pip install playwright && playwright install chromium"
         echo "  Skipping browser walkthrough."
@@ -122,7 +122,7 @@ run_browser() {
     echo "  (The browser will open — this is your demo. Screen-record it!)"
     echo ""
 
-    python demo/browser_walkthrough.py --screenshots "$OUTPUT_DIR"
+    uv run python demo/browser_walkthrough.py --screenshots "$OUTPUT_DIR"
     echo ""
     echo -e "  ${GREEN}Browser walkthrough complete!${NC}"
 }

@@ -191,7 +191,7 @@ async def get_schedules() -> dict[str, Any]:
             "name": task.name,
             "schedule": task.schedule,
             "enabled": task.enabled,
-            "task_type": task.action.get("type", "custom"),
+            "task_type": (task.action or {}).get("type", "custom"),
             "last_run": task.last_run.isoformat() if task.last_run else None,
             "next_run": task.next_run.isoformat() if task.next_run else None,
         })

@@ -12,12 +12,18 @@ NC='\033[0m'
 
 echo -e "${BLUE}Setting up demo vault at: $VAULT${NC}"
 
+# Safety guard: refuse to wipe anything that isn't under /tmp or the explicit demo default
+if [[ "$VAULT" != /tmp/* && "$VAULT" != "$HOME/.demo_vault" ]]; then
+  echo "Error: VAULT path '$VAULT' looks dangerous. Pass a path under /tmp/." >&2
+  exit 1
+fi
+
 # Clean and init
 rm -rf "$VAULT"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_DIR"
-uv run ai-employee init --vault "$VAULT" > /dev/null 2>&1
+uv run ai-employee init --vault "$VAULT" > /dev/null || { echo "ERROR: ai-employee init failed" >&2; exit 1; }
 
 # Create Gold tier directories
 mkdir -p "$VAULT/Active_Tasks"
