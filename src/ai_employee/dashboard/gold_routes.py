@@ -164,6 +164,34 @@ async def get_briefings() -> dict[str, Any]:
     return {"count": len(briefings), "briefings": briefings}
 
 
+@router.get("/api/briefings/{filename}")
+async def get_briefing_detail(filename: str) -> dict[str, Any]:
+    """Get full briefing content by filename."""
+    config = _get_vault_config()
+    briefings_dir = config.briefings
+
+    if not filename.endswith(".md"):
+        raise HTTPException(status_code=404, detail="Briefing not found")
+
+    filepath = briefings_dir / filename
+    # Path traversal protection
+    if not filepath.resolve().parent == briefings_dir.resolve():
+        raise HTTPException(status_code=404, detail="Briefing not found")
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail="Briefing not found")
+
+    content = filepath.read_text()
+    fm, body = parse_frontmatter(content)
+
+    return {
+        "filename": filename,
+        "generated": fm.get("generated", ""),
+        "period": fm.get("period", ""),
+        "content": body,
+        "frontmatter": fm,
+    }
+
+
 @router.post("/api/briefings/generate")
 async def generate_briefing(request: Request) -> dict[str, Any]:
     """Generate a new CEO briefing for a given period."""

@@ -229,6 +229,43 @@ async def get_plans() -> dict[str, Any]:
     }
 
 
+@app.get("/api/plans/{plan_id}")
+async def get_plan_detail(plan_id: str) -> dict[str, Any]:
+    """Get full plan details with all steps."""
+    config = get_vault_config()
+    service = PlannerService(config)
+
+    plan = service.get_plan(plan_id)
+    if plan is None:
+        raise HTTPException(status_code=404, detail="Plan not found")
+
+    completed = sum(1 for s in plan.steps if s.status.value == "completed")
+    steps = []
+    for s in plan.steps:
+        steps.append({
+            "id": s.id,
+            "order": s.order,
+            "description": s.description,
+            "status": s.status.value,
+            "requires_approval": s.requires_approval,
+            "error": s.error,
+            "completed_at": s.completed_at.isoformat() if s.completed_at else None,
+        })
+
+    return {
+        "id": plan.id,
+        "objective": plan.objective,
+        "status": plan.status.value,
+        "created_at": plan.created_at.isoformat(),
+        "completed_at": plan.completed_at.isoformat() if plan.completed_at else None,
+        "completion_summary": plan.completion_summary,
+        "steps": steps,
+        "steps_total": len(plan.steps),
+        "steps_completed": completed,
+        "progress": int((completed / len(plan.steps)) * 100) if plan.steps else 0,
+    }
+
+
 @app.post("/api/email/send")
 async def send_email(request: Request) -> dict[str, Any]:
     """Create email approval request."""
