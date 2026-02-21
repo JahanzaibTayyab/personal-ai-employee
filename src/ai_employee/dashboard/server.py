@@ -1,6 +1,7 @@
 """AI Employee Dashboard Server.
 
 A Mission Control-style dashboard for monitoring and managing your AI Employee.
+Bronze/Silver tier endpoints live here; Gold tier endpoints are in gold_routes.py.
 """
 
 import os
@@ -41,6 +42,11 @@ TEMPLATES_DIR = DASHBOARD_DIR / "templates"
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+# Include Gold tier routes
+from ai_employee.dashboard.gold_routes import router as gold_router  # noqa: E402
+
+app.include_router(gold_router)
 
 
 def get_vault_config() -> VaultConfig:

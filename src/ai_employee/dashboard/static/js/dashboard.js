@@ -402,7 +402,470 @@ async function runProcessInbox() {
     }
 }
 
+// =========================================
+// GOLD TIER - Modal openers
+// =========================================
+
+function openTaskModal() {
+    openModal('task-modal');
+}
+
+function openMetaModal() {
+    openModal('meta-modal');
+}
+
+function openTweetModal() {
+    openModal('tweet-modal');
+    updateTweetCharCount();
+}
+
+function updateTweetCharCount() {
+    const content = document.getElementById('tweet-content');
+    const counter = document.getElementById('tweet-chars');
+    if (content && counter) {
+        counter.textContent = content.value.length;
+    }
+}
+
+document.getElementById('tweet-content')?.addEventListener('input', updateTweetCharCount);
+
+// =========================================
+// GOLD TIER - Fetch functions
+// =========================================
+
+async function fetchTasks() {
+    try {
+        const response = await fetch('/api/tasks');
+        const data = await response.json();
+
+        const badge = document.getElementById('task-badge');
+        if (badge) badge.textContent = data.count;
+
+        const container = document.getElementById('tasks-list');
+        if (!container) return;
+
+        if (data.count === 0) {
+            container.innerHTML = '<div class="empty-state">No active tasks</div>';
+            return;
+        }
+
+        container.innerHTML = data.tasks.map(task => `
+            <div class="task-item">
+                <div class="task-info">
+                    <div class="task-prompt">${escapeHtml((task.prompt || '').substring(0, 80))}${(task.prompt || '').length > 80 ? '...' : ''}</div>
+                    <div class="task-meta">
+                        Status: <span class="task-status ${task.status}">${(task.status || 'unknown').toUpperCase()}</span>
+                        | Iteration: ${task.iteration}/${task.max_iterations}
+                    </div>
+                </div>
+                <div class="task-actions">
+                    ${task.status === 'running' ? `<button class="btn-small btn-warning" onclick="pauseTask('${task.id}')">PAUSE</button>` : ''}
+                    ${task.status === 'paused' ? `<button class="btn-small btn-approve" onclick="resumeTask('${task.id}')">RESUME</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        const container = document.getElementById('tasks-list');
+        if (container) container.innerHTML = '<div class="empty-state">Error loading tasks</div>';
+    }
+}
+
+async function fetchBriefings() {
+    try {
+        const response = await fetch('/api/briefings');
+        const data = await response.json();
+
+        const badge = document.getElementById('briefing-badge');
+        if (badge) badge.textContent = data.count;
+
+        const container = document.getElementById('briefings-list');
+        if (!container) return;
+
+        if (data.count === 0) {
+            container.innerHTML = '<div class="empty-state">No briefings generated yet</div>';
+            return;
+        }
+
+        container.innerHTML = data.briefings.map(b => `
+            <div class="briefing-item">
+                <div class="briefing-filename">${escapeHtml(b.filename)}</div>
+                <div class="briefing-meta">
+                    ${b.period ? `Period: ${escapeHtml(b.period)}` : ''}
+                    ${b.generated ? ` | Generated: ${formatDate(b.generated)}` : ''}
+                </div>
+                <div class="briefing-preview">${escapeHtml(b.preview)}</div>
+            </div>
+        `).join('');
+    } catch (error) {
+        const container = document.getElementById('briefings-list');
+        if (container) container.innerHTML = '<div class="empty-state">Error loading briefings</div>';
+    }
+}
+
+async function fetchMetaPosts() {
+    try {
+        const response = await fetch('/api/social/meta');
+        const data = await response.json();
+
+        const badge = document.getElementById('meta-badge');
+        if (badge) badge.textContent = data.count;
+
+        const container = document.getElementById('meta-list');
+        if (!container) return;
+
+        if (data.count === 0) {
+            container.innerHTML = '<div class="empty-state">No Meta posts yet</div>';
+            return;
+        }
+
+        container.innerHTML = data.posts.map(post => `
+            <div class="social-item">
+                <div class="social-info">
+                    <span class="social-platform ${post.platform}">${(post.platform || '').toUpperCase()}</span>
+                    <div class="social-content">${escapeHtml((post.content || '').substring(0, 120))}${(post.content || '').length > 120 ? '...' : ''}</div>
+                    <div class="social-meta">
+                        Status: <span class="post-status ${post.status}">${(post.status || 'draft').toUpperCase()}</span>
+                        ${post.posted_time ? ` | Posted: ${formatDate(post.posted_time)}` : ''}
+                    </div>
+                </div>
+                ${post.status === 'draft' ? `<button class="btn-small btn-approve" onclick="publishMetaPost('${post.id}')">PUBLISH</button>` : ''}
+            </div>
+        `).join('');
+    } catch (error) {
+        const container = document.getElementById('meta-list');
+        if (container) container.innerHTML = '<div class="empty-state">Error loading Meta posts</div>';
+    }
+}
+
+async function fetchTweets() {
+    try {
+        const response = await fetch('/api/social/twitter');
+        const data = await response.json();
+
+        const badge = document.getElementById('twitter-badge');
+        if (badge) badge.textContent = data.count;
+
+        const container = document.getElementById('twitter-list');
+        if (!container) return;
+
+        if (data.count === 0) {
+            container.innerHTML = '<div class="empty-state">No tweets yet</div>';
+            return;
+        }
+
+        container.innerHTML = data.tweets.map(tweet => `
+            <div class="social-item">
+                <div class="social-info">
+                    <div class="social-content">${escapeHtml((tweet.content || '').substring(0, 280))}</div>
+                    <div class="social-meta">
+                        Status: <span class="post-status ${tweet.status}">${(tweet.status || 'draft').toUpperCase()}</span>
+                        ${tweet.is_thread ? ' | Thread' : ''}
+                        ${tweet.posted_time ? ` | Posted: ${formatDate(tweet.posted_time)}` : ''}
+                    </div>
+                </div>
+                ${tweet.status === 'draft' ? `<button class="btn-small btn-approve" onclick="publishTweet('${tweet.id}')">PUBLISH</button>` : ''}
+            </div>
+        `).join('');
+    } catch (error) {
+        const container = document.getElementById('twitter-list');
+        if (container) container.innerHTML = '<div class="empty-state">Error loading tweets</div>';
+    }
+}
+
+async function fetchInvoices() {
+    try {
+        const response = await fetch('/api/invoices');
+        const data = await response.json();
+
+        const badge = document.getElementById('invoice-badge');
+        if (badge) badge.textContent = data.count;
+
+        const container = document.getElementById('invoices-list');
+        if (!container) return;
+
+        if (data.count === 0) {
+            container.innerHTML = '<div class="empty-state">No invoices</div>';
+            return;
+        }
+
+        container.innerHTML = data.invoices.map(inv => `
+            <div class="invoice-item">
+                <div class="invoice-info">
+                    <div class="invoice-customer">${escapeHtml(inv.customer || 'Unknown')}</div>
+                    <div class="invoice-meta">
+                        Amount: $${inv.amount || 0} | Status: ${(inv.status || 'draft').toUpperCase()}
+                        ${inv.due_date ? ` | Due: ${inv.due_date}` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        const container = document.getElementById('invoices-list');
+        if (container) {
+            if (error.message && error.message.includes('503')) {
+                container.innerHTML = '<div class="empty-state">Odoo not connected</div>';
+            } else {
+                container.innerHTML = '<div class="empty-state">No invoices</div>';
+            }
+        }
+    }
+}
+
+async function fetchHealth() {
+    try {
+        const response = await fetch('/api/health');
+        const data = await response.json();
+
+        const container = document.getElementById('health-status');
+        if (!container) return;
+
+        const services = data.services || {};
+        container.innerHTML = `
+            <div class="health-overall ${data.overall}">
+                SYSTEM: ${(data.overall || 'unknown').toUpperCase()}
+                ${data.dev_mode ? ' <span class="dev-mode-badge">DEV MODE</span>' : ''}
+            </div>
+            <div class="health-services">
+                ${Object.entries(services).map(([name, info]) => `
+                    <div class="health-service">
+                        <span class="service-name">${name.toUpperCase()}</span>
+                        <span class="service-status ${info.status}">${(info.status || 'unknown').toUpperCase()}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="health-summary">${escapeHtml(data.summary || '')}</div>
+        `;
+    } catch (error) {
+        const container = document.getElementById('health-status');
+        if (container) container.innerHTML = '<div class="empty-state">Error checking health</div>';
+    }
+}
+
+async function fetchAuditLog() {
+    try {
+        const response = await fetch('/api/audit');
+        const data = await response.json();
+
+        const badge = document.getElementById('audit-badge');
+        if (badge) badge.textContent = data.count;
+
+        const container = document.getElementById('audit-list');
+        if (!container) return;
+
+        if (data.count === 0) {
+            container.innerHTML = '<div class="empty-state">No audit entries</div>';
+            return;
+        }
+
+        container.innerHTML = data.entries.slice(0, 10).map(entry => `
+            <div class="audit-item">
+                <span class="audit-time">${(entry.timestamp || '').substring(11, 19)}</span>
+                <span class="audit-action">${escapeHtml(entry.action_type || entry.operation || 'action')}</span>
+                <span class="audit-result ${entry.result || (entry.success ? 'success' : 'failure')}">${entry.result || (entry.success ? 'OK' : 'FAIL')}</span>
+            </div>
+        `).join('');
+    } catch (error) {
+        const container = document.getElementById('audit-list');
+        if (container) container.innerHTML = '<div class="empty-state">No audit entries</div>';
+    }
+}
+
+// =========================================
+// GOLD TIER - Action handlers
+// =========================================
+
+async function createTask(event) {
+    event.preventDefault();
+    const prompt = document.getElementById('task-prompt').value;
+    const maxIter = parseInt(document.getElementById('task-max-iter').value) || 10;
+
+    try {
+        const response = await fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, max_iterations: maxIter })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            showToast(`Task created: ${data.task_id}`, 'success');
+            closeModal('task-modal');
+            document.getElementById('task-form').reset();
+            fetchTasks();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Failed to create task', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+async function pauseTask(taskId) {
+    try {
+        const response = await fetch(`/api/tasks/${taskId}/pause`, { method: 'POST' });
+        if (response.ok) {
+            showToast('Task paused', 'success');
+            fetchTasks();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Failed to pause task', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+async function resumeTask(taskId) {
+    try {
+        const response = await fetch(`/api/tasks/${taskId}/resume`, { method: 'POST' });
+        if (response.ok) {
+            showToast('Task resumed', 'success');
+            fetchTasks();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Failed to resume task', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+async function createMetaPost(event) {
+    event.preventDefault();
+    const platform = document.getElementById('meta-platform').value;
+    const content = document.getElementById('meta-content').value;
+
+    try {
+        const response = await fetch('/api/social/meta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platform, content })
+        });
+
+        if (response.ok) {
+            showToast('Meta post created', 'success');
+            closeModal('meta-modal');
+            document.getElementById('meta-form').reset();
+            fetchMetaPosts();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Failed to create post', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+async function publishMetaPost(postId) {
+    try {
+        const response = await fetch(`/api/social/meta/${postId}/publish`, { method: 'POST' });
+        if (response.ok) {
+            showToast('Meta post published', 'success');
+            fetchMetaPosts();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Meta API not connected', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+async function createTweet(event) {
+    event.preventDefault();
+    const content = document.getElementById('tweet-content').value;
+
+    try {
+        const response = await fetch('/api/social/twitter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content })
+        });
+
+        if (response.ok) {
+            showToast('Tweet created', 'success');
+            closeModal('tweet-modal');
+            document.getElementById('tweet-form').reset();
+            updateTweetCharCount();
+            fetchTweets();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Failed to create tweet', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+async function publishTweet(tweetId) {
+    try {
+        const response = await fetch(`/api/social/twitter/${tweetId}/publish`, { method: 'POST' });
+        if (response.ok) {
+            showToast('Tweet published', 'success');
+            fetchTweets();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Twitter API not connected', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+async function generateBriefing() {
+    showToast('Generating CEO briefing...', 'info');
+
+    try {
+        const response = await fetch('/api/briefings/generate', { method: 'POST' });
+        if (response.ok) {
+            const data = await response.json();
+            showToast('CEO briefing generated', 'success');
+            fetchBriefings();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Failed to generate briefing', 'error');
+        }
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
+async function searchCorrelations() {
+    const query = document.getElementById('search-query').value.trim();
+    if (!query) return;
+
+    const container = document.getElementById('search-results');
+    if (!container) return;
+    container.innerHTML = '<div class="loading">Searching...</div>';
+
+    try {
+        const response = await fetch(`/api/correlations/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (data.count === 0) {
+            container.innerHTML = '<div class="empty-state">No results found</div>';
+            return;
+        }
+
+        container.innerHTML = data.results.map(r => `
+            <div class="search-result">
+                <div class="result-header">
+                    <span class="result-folder">${escapeHtml(r.folder)}</span>
+                    <span class="result-file">${escapeHtml(r.file)}</span>
+                </div>
+                <div class="result-preview">${escapeHtml(r.preview)}</div>
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = '<div class="empty-state">Search error</div>';
+    }
+}
+
+// =========================================
 // Utility functions
+// =========================================
+
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -416,13 +879,21 @@ function formatDate(isoString) {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// Refresh all data
+// Refresh all data (Bronze + Silver + Gold)
 function refreshAll() {
     updateTimestamp();
     fetchStatus();
     fetchApprovals();
     fetchSchedules();
     fetchPlans();
+    // Gold tier
+    fetchTasks();
+    fetchBriefings();
+    fetchMetaPosts();
+    fetchTweets();
+    fetchInvoices();
+    fetchHealth();
+    fetchAuditLog();
 }
 
 // Initialize dashboard

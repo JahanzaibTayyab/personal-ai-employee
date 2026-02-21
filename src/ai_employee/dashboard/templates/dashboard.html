@@ -109,6 +109,22 @@
                             <span class="action-icon">&#9881;</span>
                             <span class="action-label">PROCESS INBOX</span>
                         </button>
+                        <button class="action-btn gold" onclick="openTaskModal()">
+                            <span class="action-icon">&#9881;</span>
+                            <span class="action-label">START TASK</span>
+                        </button>
+                        <button class="action-btn gold" onclick="openMetaModal()">
+                            <span class="action-icon">&#127760;</span>
+                            <span class="action-label">META POST</span>
+                        </button>
+                        <button class="action-btn gold" onclick="openTweetModal()">
+                            <span class="action-icon">&#128038;</span>
+                            <span class="action-label">TWEET</span>
+                        </button>
+                        <button class="action-btn gold" onclick="generateBriefing()">
+                            <span class="action-icon">&#128202;</span>
+                            <span class="action-label">CEO BRIEFING</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -132,6 +148,103 @@
                 </div>
                 <div class="panel-content" id="plans-list">
                     <div class="loading">Loading plans...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gold Tier Section -->
+        <section class="gold-tier-header">
+            <h2 class="tier-label">GOLD TIER</h2>
+        </section>
+
+        <section class="content-grid">
+            <!-- Ralph Wiggum Tasks Panel -->
+            <div class="panel tasks-panel">
+                <div class="panel-header">
+                    <h2>&#9881; RALPH WIGGUM TASKS</h2>
+                    <span class="badge" id="task-badge">0</span>
+                </div>
+                <div class="panel-content" id="tasks-list">
+                    <div class="loading">Loading tasks...</div>
+                </div>
+            </div>
+
+            <!-- CEO Briefings Panel -->
+            <div class="panel briefings-panel">
+                <div class="panel-header">
+                    <h2>&#128202; CEO BRIEFINGS</h2>
+                    <span class="badge" id="briefing-badge">0</span>
+                </div>
+                <div class="panel-content" id="briefings-list">
+                    <div class="loading">Loading briefings...</div>
+                </div>
+            </div>
+
+            <!-- Meta Posts Panel -->
+            <div class="panel meta-panel">
+                <div class="panel-header">
+                    <h2>&#127760; META POSTS</h2>
+                    <span class="badge" id="meta-badge">0</span>
+                </div>
+                <div class="panel-content" id="meta-list">
+                    <div class="loading">Loading posts...</div>
+                </div>
+            </div>
+
+            <!-- Twitter Panel -->
+            <div class="panel twitter-panel">
+                <div class="panel-header">
+                    <h2>&#128038; TWEETS</h2>
+                    <span class="badge" id="twitter-badge">0</span>
+                </div>
+                <div class="panel-content" id="twitter-list">
+                    <div class="loading">Loading tweets...</div>
+                </div>
+            </div>
+
+            <!-- Invoices Panel -->
+            <div class="panel invoices-panel">
+                <div class="panel-header">
+                    <h2>&#128176; INVOICES</h2>
+                    <span class="badge" id="invoice-badge">0</span>
+                </div>
+                <div class="panel-content" id="invoices-list">
+                    <div class="loading">Loading invoices...</div>
+                </div>
+            </div>
+
+            <!-- System Health Panel -->
+            <div class="panel health-panel">
+                <div class="panel-header">
+                    <h2>&#9829; SYSTEM HEALTH</h2>
+                </div>
+                <div class="panel-content" id="health-status">
+                    <div class="loading">Checking health...</div>
+                </div>
+            </div>
+
+            <!-- Audit Log Panel -->
+            <div class="panel audit-panel">
+                <div class="panel-header">
+                    <h2>&#128270; AUDIT LOG</h2>
+                    <span class="badge" id="audit-badge">0</span>
+                </div>
+                <div class="panel-content" id="audit-list">
+                    <div class="loading">Loading audit log...</div>
+                </div>
+            </div>
+
+            <!-- Cross-Domain Search Panel -->
+            <div class="panel search-panel">
+                <div class="panel-header">
+                    <h2>&#128269; CROSS-DOMAIN SEARCH</h2>
+                </div>
+                <div class="panel-content">
+                    <div class="search-box">
+                        <input type="text" id="search-query" placeholder="Search across all domains..." onkeydown="if(event.key==='Enter') searchCorrelations()">
+                        <button class="btn-search" onclick="searchCorrelations()">SEARCH</button>
+                    </div>
+                    <div id="search-results"></div>
                 </div>
             </div>
         </section>
@@ -229,6 +342,78 @@
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="closeModal('plan-modal')">CANCEL</button>
                     <button type="submit" class="btn-submit">CREATE PLAN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Modal (Gold) -->
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>&#9881; START RALPH WIGGUM TASK</h3>
+                <button class="close-btn" onclick="closeModal('task-modal')">&times;</button>
+            </div>
+            <form id="task-form" onsubmit="createTask(event)">
+                <div class="form-group">
+                    <label>TASK PROMPT:</label>
+                    <textarea id="task-prompt" rows="6" required placeholder="Describe the task for Ralph Wiggum to execute autonomously..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>MAX ITERATIONS:</label>
+                    <input type="number" id="task-max-iter" value="10" min="1" max="50">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('task-modal')">CANCEL</button>
+                    <button type="submit" class="btn-submit">START TASK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Meta Post Modal (Gold) -->
+    <div class="modal" id="meta-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>&#127760; CREATE META POST</h3>
+                <button class="close-btn" onclick="closeModal('meta-modal')">&times;</button>
+            </div>
+            <form id="meta-form" onsubmit="createMetaPost(event)">
+                <div class="form-group">
+                    <label>PLATFORM:</label>
+                    <select id="meta-platform">
+                        <option value="facebook">Facebook</option>
+                        <option value="instagram">Instagram</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>POST CONTENT:</label>
+                    <textarea id="meta-content" rows="6" required placeholder="Write your Facebook/Instagram post..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('meta-modal')">CANCEL</button>
+                    <button type="submit" class="btn-submit">CREATE POST</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tweet Modal (Gold) -->
+    <div class="modal" id="tweet-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>&#128038; COMPOSE TWEET</h3>
+                <button class="close-btn" onclick="closeModal('tweet-modal')">&times;</button>
+            </div>
+            <form id="tweet-form" onsubmit="createTweet(event)">
+                <div class="form-group">
+                    <label>TWEET CONTENT:</label>
+                    <textarea id="tweet-content" rows="4" required maxlength="280" placeholder="What's happening?"></textarea>
+                    <div class="char-count"><span id="tweet-chars">0</span>/280</div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('tweet-modal')">CANCEL</button>
+                    <button type="submit" class="btn-submit">CREATE TWEET</button>
                 </div>
             </form>
         </div>

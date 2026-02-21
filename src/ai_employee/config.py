@@ -235,6 +235,7 @@ class Config:
     vault: VaultConfig
     watch_interval: int = 60  # seconds
     gmail_credentials_path: Path | None = None
+    dev_mode: bool = False
 
     @classmethod
     def from_env(cls, vault_path: str | Path | None = None) -> "Config":
@@ -256,8 +257,11 @@ class Config:
         gmail_creds = os.environ.get("GMAIL_CREDENTIALS_PATH")
         gmail_credentials_path = Path(gmail_creds).expanduser() if gmail_creds else None
 
+        dev_mode = os.environ.get("DEV_MODE", "false").lower() == "true"
+
         return cls(
             vault=VaultConfig(root=vault_path),
             watch_interval=watch_interval,
             gmail_credentials_path=gmail_credentials_path,
+            dev_mode=dev_mode,
         )
